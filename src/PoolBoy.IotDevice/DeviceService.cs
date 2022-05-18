@@ -24,11 +24,34 @@ namespace PoolBoy.IotDevice
         /// </summary>
         private const int DefaultTimeout = 15000;
 
+        /// <summary>
+        /// Used for synchronizing parameters from server / client
+        /// </summary>
         internal int PatchId { get; private set; }
+
+        /// <summary>
+        /// Configuration of the chlorine pump
+        /// </summary>
         internal ChlorinePumpConfig ChlorinePumpConfig { get; private set; }
+
+        /// <summary>
+        /// Configures of the pool pump
+        /// </summary>
         internal PoolPumpConfig PoolPumpConfig { get; private set; }
 
+        /// <summary>
+        /// Current applied patch on the client
+        /// </summary>
+        internal int LastPatchId { get; private set; }
+
+        /// <summary>
+        /// Current status of the pool pump
+        /// </summary>
         internal PoolPumpStatus PoolPumpStatus { get; }
+
+        /// <summary>
+        /// Current status of the chlorine pump
+        /// </summary>
         internal ChlorinePumpStatus ChlorinePumpStatus { get; }
 
         private readonly DeviceClient _deviceClient;
@@ -76,6 +99,19 @@ namespace PoolBoy.IotDevice
 
             return false;
         }
+
+        /// <summary>
+        /// Sends the reported properties to the server
+        /// </summary>
+        public void SendReportedProperties()
+        {
+            var collection = new TwinCollection();
+            collection.Add(GetJsonName(nameof(LastPatchId)), LastPatchId);
+            collection.Add(GetJsonName(nameof(PoolPumpStatus)), PoolPumpStatus);
+            collection.Add(GetJsonName(nameof(ChlorinePumpStatus)), ChlorinePumpStatus);
+            _deviceClient.UpdateReportedProperties(collection);
+        }
+                
 
         /// <summary>
         /// Parses the desired properties

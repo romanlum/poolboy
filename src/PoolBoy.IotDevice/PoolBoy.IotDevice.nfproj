@@ -19,7 +19,14 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="BasicFont.cs" />
+    <Compile Include="DeviceService.cs" />
     <Compile Include="Helpers.cs" />
+    <Compile Include="Infrastructure\Certifiacates.cs" />
+    <Compile Include="IoService.cs" />
+    <Compile Include="Model\ChlorinePumpConfig.cs" />
+    <Compile Include="Model\ChlorinePumpStatus.cs" />
+    <Compile Include="Model\PoolPumpConfig.cs" />
+    <Compile Include="Model\PoolPumpStatus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WlanTask.cs" />
