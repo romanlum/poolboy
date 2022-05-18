@@ -42,7 +42,7 @@ namespace PoolBoy.IotDevice
         /// <summary>
         /// Current applied patch on the client
         /// </summary>
-        internal int LastPatchId { get; private set; }
+        internal int LastPatchId { get; set; }
 
         /// <summary>
         /// Current status of the pool pump

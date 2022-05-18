@@ -29,6 +29,7 @@
     <Compile Include="Model\PoolPumpStatus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TimerTask.cs" />
     <Compile Include="WlanTask.cs" />
   </ItemGroup>
   <ItemGroup>
