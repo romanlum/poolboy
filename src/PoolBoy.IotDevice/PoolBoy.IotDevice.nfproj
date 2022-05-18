@@ -22,6 +22,7 @@
     <Compile Include="DeviceService.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Infrastructure\Certifiacates.cs" />
+    <Compile Include="Infrastructure\DateTimeExtension.cs" />
     <Compile Include="IoService.cs" />
     <Compile Include="Model\ChlorinePumpConfig.cs" />
     <Compile Include="Model\ChlorinePumpStatus.cs" />

@@ -1,67 +1,99 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Threading;
+using PoolBoy.IotDevice.Infrastructure;
 
 namespace PoolBoy.IotDevice
 {
     internal class TimerTask
     {
 
-        private const int LoopTime = 5000;
+        private const int LoopTime = 100;
 
-        private readonly DeviceService deviceService;
-        private readonly IoService ioService;
+        private readonly DeviceService _deviceService;
+        private readonly IoService _ioService;
 
+        /// <summary>
+        /// Creates a new instance
+        /// </summary>
+        /// <param name="deviceService"></param>
+        /// <param name="ioService"></param>
         public TimerTask(DeviceService deviceService, IoService ioService)
         {
-            this.deviceService = deviceService;
-            this.ioService = ioService;
+            _deviceService = deviceService;
+            _ioService = ioService;
         }
 
-        internal void RunLoop()
+        /// <summary>
+        /// Runs the task in an infinite loop
+        /// </summary>
+        internal void RunLoop(CancellationToken token = default(CancellationToken))
         {
-            while(true)
+            while(!token.IsCancellationRequested)
             {
-
-                var startTime = DateTime.Parse("2000-01-01 " + deviceService.PoolPumpConfig.startTime);
-                var stopTime = DateTime.Parse("2000-01-01 " + deviceService.PoolPumpConfig.stopTime);
-                var curTime =  DateTime.UtcNow;
-                var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
-
-                bool statusChanged = false;
-                if(startTime >= checkTime && checkTime <= stopTime)
+                try
                 {
-                    if (!ioService.PoolPumpActive)
+                    var curTime = DateTime.UtcNow;
+                    var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
+                    var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
+                    
+                    var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
+
+                    bool statusChanged = false;
+                    Debug.WriteLine(_deviceService.PoolPumpConfig.enabled.ToString());
+                    if (_deviceService.PoolPumpConfig.enabled && checkTime >= startTime && checkTime <= stopTime)
                     {
+                        if (!_ioService.PoolPumpActive)
+                        {
+                            statusChanged = true;
+                        }
+
+                        _ioService.ChangePoolPumpStatus(true);
+                        _deviceService.PoolPumpStatus.active = true;
+                    }
+                    else
+                    {
+                        if (_ioService.PoolPumpActive)
+                        {
+                            statusChanged = true;
+                        }
+
+                        _ioService.ChangePoolPumpStatus(false);
+                        _deviceService.PoolPumpStatus.active = false;
+                    }
+
+                    if (_deviceService.LastPatchId != _deviceService.PatchId)
+                    {
+                        _deviceService.LastPatchId = _deviceService.PatchId;
                         statusChanged = true;
                     }
-                    ioService.ChangePoolPumpStatus(true);
-                    deviceService.PoolPumpStatus.active = true;
-                }
-                else
-                {
-                    if (ioService.PoolPumpActive)
+
+                    if (_deviceService.Error != null)
                     {
+                        _deviceService.Error = null;
                         statusChanged = true;
                     }
-                    ioService.ChangePoolPumpStatus(false);
-                    deviceService.PoolPumpStatus.active = false;
+
+                    if (statusChanged)
+                    {
+                        _deviceService.SendReportedProperties();
+                    }
+                }
+                catch (Exception e)
+                {
+                    _ioService.ChangeChlorinePumpStatus(false);
+                    _ioService.ChangePoolPumpStatus(false);
+                    _deviceService.PoolPumpStatus.active = false;
+                    _deviceService.ChlorinePumpStatus.active = false;
+
+                    if (_deviceService.Error == null || !_deviceService.Error.Equals(e.Message))
+                    {
+                        _deviceService.Error = e.Message;
+                        _deviceService.SendReportedProperties();
+                    }
                 }
 
-                if(deviceService.LastPatchId != deviceService.PatchId)
-                {
-                    deviceService.LastPatchId = deviceService.PatchId;
-                    statusChanged = true;
-                }
-                
-                if(statusChanged)
-                {
-                    deviceService.SendReportedProperties();
-                }
-                
-
-                Thread.Sleep(5000);
+                Thread.Sleep(LoopTime);
 
             }
         }

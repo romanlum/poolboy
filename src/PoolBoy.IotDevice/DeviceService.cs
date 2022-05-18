@@ -54,6 +54,11 @@ namespace PoolBoy.IotDevice
         /// </summary>
         internal ChlorinePumpStatus ChlorinePumpStatus { get; }
 
+        /// <summary>
+        /// Error property for backend
+        /// </summary>
+        internal string Error { get; set; }
+
         private readonly DeviceClient _deviceClient;
         private Twin _deviceTwin;
 
@@ -61,6 +66,9 @@ namespace PoolBoy.IotDevice
         {
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
                 azureCert: Certificates.AzureRootCertificateAuthority);
+            ChlorinePumpStatus = new ChlorinePumpStatus();
+            PoolPumpStatus = new PoolPumpStatus();
+            Error = null;
         }
 
         /// <summary>
@@ -109,6 +117,7 @@ namespace PoolBoy.IotDevice
             collection.Add(GetJsonName(nameof(LastPatchId)), LastPatchId);
             collection.Add(GetJsonName(nameof(PoolPumpStatus)), PoolPumpStatus);
             collection.Add(GetJsonName(nameof(ChlorinePumpStatus)), ChlorinePumpStatus);
+            collection.Add(GetJsonName(nameof(Error)), Error);
             _deviceClient.UpdateReportedProperties(collection);
         }
                 
