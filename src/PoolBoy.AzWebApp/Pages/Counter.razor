@@ -1,0 +1,32 @@
+﻿@page "/counter"
+@using Azure.Messaging.EventHubs.Consumer
+@using Microsoft.Azure.Devices
+@using Microsoft.Azure.Devices.Shared
+@using PoolBoyWebApp.Data
+@inject IConfiguration config
+@inject IoTHubService iotHubService;
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+@code {
+    private int currentCount = 0;
+
+    private async void IncrementCount()
+    {
+        currentCount++;
+        await SendCloudToDeviceMessage();
+    }
+
+    private async Task SendCloudToDeviceMessage()
+    {
+
+        var state = iotHubService.GetCurrentDeviceState();
+
+    }
+}
