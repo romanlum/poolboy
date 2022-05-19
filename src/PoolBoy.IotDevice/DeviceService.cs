@@ -12,7 +12,7 @@ namespace PoolBoy.IotDevice
     /// <summary>
     /// Iot service for communicating with the azure iot hub
     /// </summary>
-    internal class DeviceService
+    public class DeviceService : IDeviceService
     {
         /// <summary>
         /// Retries connecting to iot hub
@@ -27,37 +27,37 @@ namespace PoolBoy.IotDevice
         /// <summary>
         /// Used for synchronizing parameters from server / client
         /// </summary>
-        internal int PatchId { get; private set; }
+        public int PatchId { get; private set; }
 
         /// <summary>
         /// Configuration of the chlorine pump
         /// </summary>
-        internal ChlorinePumpConfig ChlorinePumpConfig { get; private set; }
+        public ChlorinePumpConfig ChlorinePumpConfig { get; private set; }
 
         /// <summary>
         /// Configures of the pool pump
         /// </summary>
-        internal PoolPumpConfig PoolPumpConfig { get; private set; }
+        public PoolPumpConfig PoolPumpConfig { get; private set; }
 
         /// <summary>
         /// Current applied patch on the client
         /// </summary>
-        internal int LastPatchId { get; set; }
+        public int LastPatchId { get; set; }
 
         /// <summary>
         /// Current status of the pool pump
         /// </summary>
-        internal PoolPumpStatus PoolPumpStatus { get; }
+        public PoolPumpStatus PoolPumpStatus { get; }
 
         /// <summary>
         /// Current status of the chlorine pump
         /// </summary>
-        internal ChlorinePumpStatus ChlorinePumpStatus { get; }
+        public ChlorinePumpStatus ChlorinePumpStatus { get; }
 
         /// <summary>
         /// Error property for backend
         /// </summary>
-        internal string Error { get; set; }
+        public string Error { get; set; }
 
         private readonly DeviceClient _deviceClient;
         private Twin _deviceTwin;

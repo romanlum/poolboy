@@ -13,18 +13,20 @@ namespace PoolBoy.IotDevice
 
         private const int LoopTime = 100;
 
-        private readonly DeviceService _deviceService;
-        private readonly IoService _ioService;
+        private readonly IDeviceService _deviceService;
+        private readonly IIoService _ioService;
+        private readonly IDateTimeService _dateTimeService;
 
         /// <summary>
         /// Creates a new instance
         /// </summary>
         /// <param name="deviceService"></param>
         /// <param name="ioService"></param>
-        public TimerTask(DeviceService deviceService, IoService ioService)
+        public TimerTask(IDeviceService deviceService, IIoService ioService, IDateTimeService dateTimeService)
         {
             _deviceService = deviceService;
             _ioService = ioService;
+            _dateTimeService = dateTimeService;
         }
 
         /// <summary>
@@ -36,7 +38,7 @@ namespace PoolBoy.IotDevice
             {
                 try
                 {
-                    var curTime = DateTime.UtcNow;
+                    var curTime = _dateTimeService.Now;
                     bool statusChanged = false;
                     
                     //chlorine pump handling
@@ -57,7 +59,7 @@ namespace PoolBoy.IotDevice
                         else if(_deviceService.ChlorinePumpConfig.runId <= _deviceService.ChlorinePumpStatus.runId) //running or already finished
                         {
                             var chlorineEndTime = DateTime.FromUnixTimeSeconds(_deviceService.ChlorinePumpStatus.startedAt).AddSeconds(_deviceService.ChlorinePumpConfig.runtime); 
-                            if(DateTime.UtcNow < chlorineEndTime) 
+                            if(curTime < chlorineEndTime) 
                             {
                                 statusChanged = SetPoolPumpStatus(true);
                                 if(SetChlorinePumpStatus(true))
