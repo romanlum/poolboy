@@ -5,6 +5,9 @@ using PoolBoy.IotDevice.Infrastructure;
 
 namespace PoolBoy.IotDevice
 {
+    /// <summary>
+    /// Task for timer based implementation
+    /// </summary>
     internal class TimerTask
     {
 
@@ -34,57 +37,87 @@ namespace PoolBoy.IotDevice
                 try
                 {
                     var curTime = DateTime.UtcNow;
-                    var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
-                    var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
-                    
-                    var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
-
                     bool statusChanged = false;
-                    Debug.WriteLine(_deviceService.PoolPumpConfig.enabled.ToString());
-                    if (_deviceService.PoolPumpConfig.enabled && checkTime >= startTime && checkTime <= stopTime)
+                    
+                    //chlorine pump handling
+                    if(_deviceService.ChlorinePumpConfig.enabled)
                     {
-                        if (!_ioService.PoolPumpActive)
+                        //chlorine pump should be enabled
+                        if(_deviceService.ChlorinePumpConfig.runId > _deviceService.ChlorinePumpStatus.runId && _deviceService.ChlorinePumpConfig.runtime > 0)
                         {
+                            statusChanged = SetPoolPumpStatus(true);
+                            if(SetChlorinePumpStatus(true))
+                            {
+                                statusChanged = true;
+                            }
+                            _deviceService.ChlorinePumpStatus.runId = _deviceService.ChlorinePumpConfig.runId;
+                            _deviceService.ChlorinePumpStatus.startedAt = curTime.ToUnixTimeSeconds();
+
+                        } 
+                        else if(_deviceService.ChlorinePumpConfig.runId <= _deviceService.ChlorinePumpStatus.runId) //running or already finished
+                        {
+                            var chlorineEndTime = DateTime.FromUnixTimeSeconds(_deviceService.ChlorinePumpStatus.startedAt).AddSeconds(_deviceService.ChlorinePumpConfig.runtime); 
+                            if(DateTime.UtcNow < chlorineEndTime) 
+                            {
+                                statusChanged = SetPoolPumpStatus(true);
+                                if(SetChlorinePumpStatus(true))
+                                {
+                                    statusChanged = true;
+                                }
+                            }
+                            else //finished
+                            {
+                                statusChanged = SetChlorinePumpStatus(false);
+                            }
+                        }
+                        if(statusChanged)
+                        {
+                            _deviceService.SendReportedProperties();
+                        }
+                       
+                    }
+
+                    //only change pool pump if chlorine pump is not active
+                    if(!_deviceService.ChlorinePumpStatus.active)
+                    {
+                        var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
+                        var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
+                        var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
+
+                        if (_deviceService.PoolPumpConfig.enabled && checkTime >= startTime && checkTime <= stopTime) //should be running
+                        {
+                            statusChanged = SetPoolPumpStatus(true);
+                        }
+                        else
+                        {
+                            statusChanged = SetPoolPumpStatus(false);
+                        }
+
+                        if (_deviceService.LastPatchId != _deviceService.PatchId)
+                        {
+                            _deviceService.LastPatchId = _deviceService.PatchId;
                             statusChanged = true;
                         }
 
-                        _ioService.ChangePoolPumpStatus(true);
-                        _deviceService.PoolPumpStatus.active = true;
-                    }
-                    else
-                    {
-                        if (_ioService.PoolPumpActive)
+                        //reset error
+                        if (_deviceService.Error != null)
                         {
+                            _deviceService.Error = null;
                             statusChanged = true;
                         }
-
-                        _ioService.ChangePoolPumpStatus(false);
-                        _deviceService.PoolPumpStatus.active = false;
-                    }
-
-                    if (_deviceService.LastPatchId != _deviceService.PatchId)
-                    {
-                        _deviceService.LastPatchId = _deviceService.PatchId;
-                        statusChanged = true;
-                    }
-
-                    if (_deviceService.Error != null)
-                    {
-                        _deviceService.Error = null;
-                        statusChanged = true;
+  
                     }
 
                     if (statusChanged)
                     {
                         _deviceService.SendReportedProperties();
                     }
+
                 }
                 catch (Exception e)
                 {
-                    _ioService.ChangeChlorinePumpStatus(false);
-                    _ioService.ChangePoolPumpStatus(false);
-                    _deviceService.PoolPumpStatus.active = false;
-                    _deviceService.ChlorinePumpStatus.active = false;
+                    SetChlorinePumpStatus(false);
+                    SetPoolPumpStatus(false);
 
                     if (_deviceService.Error == null || !_deviceService.Error.Equals(e.Message))
                     {
@@ -96,6 +129,62 @@ namespace PoolBoy.IotDevice
                 Thread.Sleep(LoopTime);
 
             }
+        }
+
+        /// <summary>
+        /// Sets the pool pump status and returns if the status had to be changed
+        /// </summary>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        internal bool SetPoolPumpStatus(bool enabled)
+        {
+            if(enabled)
+            {
+                if (!_ioService.PoolPumpActive)
+                {
+                    _ioService.ChangePoolPumpStatus(true);
+                    _deviceService.PoolPumpStatus.active = true;
+                    return true;
+                }
+            }
+            else
+            {
+                if (_ioService.PoolPumpActive)
+                {
+                    _ioService.ChangePoolPumpStatus(false);
+                    _deviceService.PoolPumpStatus.active = false;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Sets the chlorine pump status and returns if the status had to be changed
+        /// </summary>
+        /// <param name="enabled"></param>
+        /// <returns></returns>
+        internal bool SetChlorinePumpStatus(bool enabled)
+        {
+            if (enabled)
+            {
+                if (!_ioService.ChlorinePumpActive)
+                {
+                    _ioService.ChangeChlorinePumpStatus(true);
+                    _deviceService.ChlorinePumpStatus.active = true;
+                    return true;
+                }
+            }
+            else
+            {
+                if (_ioService.ChlorinePumpActive)
+                {
+                    _ioService.ChangeChlorinePumpStatus(false);
+                    _deviceService.ChlorinePumpStatus.active = false;
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

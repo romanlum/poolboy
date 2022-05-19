@@ -62,6 +62,12 @@ namespace PoolBoy.IotDevice
         private readonly DeviceClient _deviceClient;
         private Twin _deviceTwin;
 
+        /// <summary>
+        /// Creates a new instance
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <param name="iotBrokerAddress"></param>
+        /// <param name="sasKey"></param>
         public DeviceService(string deviceId, string iotBrokerAddress, string sasKey)
         {
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
