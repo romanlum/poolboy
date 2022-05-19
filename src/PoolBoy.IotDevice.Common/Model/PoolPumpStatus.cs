@@ -1,7 +1,7 @@
 ﻿
 // ReSharper disable InconsistentNaming
 
-namespace PoolBoy.IotDevice.Model
+namespace PoolBoy.IotDevice.Common.Model
 {
     public class PoolPumpStatus
     {

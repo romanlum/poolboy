@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Device.Gpio;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     /// <summary>
     /// Responsible for controlling the device IOs

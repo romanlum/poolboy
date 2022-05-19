@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PoolBoy.IotDevice.Infrastructure
+namespace PoolBoy.IotDevice.Common.Infrastructure
 {
     /// <summary>
     /// Date and Time extension methods
@@ -15,6 +15,11 @@ namespace PoolBoy.IotDevice.Infrastructure
         /// <exception cref="ArgumentException"></exception>
         internal static DateTime FromTimeString(string timeString)
         {
+            if (string.IsNullOrEmpty(timeString))
+            {
+                throw new ArgumentException("Invalid time string");
+            }
+
             var splitted = timeString.Split(':');
 
             if (splitted.Length > 1)

@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
+﻿using System.Security.Cryptography.X509Certificates;
 
-namespace PoolBoy.IotDevice.Infrastructure
+namespace PoolBoy.IotDevice.Common.Infrastructure
 {
     /// <summary>
     /// Class for holding the static certificates needed by azure
@@ -14,8 +11,10 @@ namespace PoolBoy.IotDevice.Infrastructure
         /// <summary>
         /// X509 Azure Root Certificate
         /// </summary>
-        internal static X509Certificate AzureRootCertificateAuthority { get; } =
-            new X509Certificate(AzureRootCertificateAuthorityString);
+        internal static X509Certificate AzureRootCertificateAuthority()
+        {
+            return new X509Certificate(AzureRootCertificateAuthorityString);
+        }
 
         /// <summary>
         /// Certificate for IOT hub

@@ -4,10 +4,10 @@ using System.Threading;
 using nanoFramework.Azure.Devices.Client;
 using nanoFramework.Azure.Devices.Shared;
 using nanoFramework.Json;
-using PoolBoy.IotDevice.Infrastructure;
-using PoolBoy.IotDevice.Model;
+using PoolBoy.IotDevice.Common.Infrastructure;
+using PoolBoy.IotDevice.Common.Model;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     /// <summary>
     /// Iot service for communicating with the azure iot hub
@@ -71,7 +71,7 @@ namespace PoolBoy.IotDevice
         public DeviceService(string deviceId, string iotBrokerAddress, string sasKey)
         {
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
-                azureCert: Certificates.AzureRootCertificateAuthority);
+                azureCert: Certificates.AzureRootCertificateAuthority());
             ChlorinePumpStatus = new ChlorinePumpStatus();
             PoolPumpStatus = new PoolPumpStatus();
             Error = null;

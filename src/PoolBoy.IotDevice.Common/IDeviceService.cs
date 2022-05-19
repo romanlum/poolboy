@@ -1,6 +1,6 @@
-﻿using PoolBoy.IotDevice.Model;
+﻿using PoolBoy.IotDevice.Common.Model;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     public interface IDeviceService
     {

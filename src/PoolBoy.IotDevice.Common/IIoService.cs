@@ -1,6 +1,6 @@
-﻿namespace PoolBoy.IotDevice
+﻿namespace PoolBoy.IotDevice.Common
 {
-    internal interface IIoService
+    public interface IIoService
     {
         /// <summary>
         /// Gets wether the pool pump is active
