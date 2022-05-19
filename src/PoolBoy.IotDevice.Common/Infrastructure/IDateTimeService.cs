@@ -15,5 +15,12 @@ namespace PoolBoy.IotDevice.Common.Infrastructure
         /// <param name="seconds"></param>
         /// <returns></returns>
         DateTime FromUnixTimeSeconds(long seconds);
+
+        /// <summary>
+        /// Gets the unix time in seconds from a date time
+        /// </summary>
+        /// <param name="curTime"></param>
+        /// <returns></returns>
+        long ToUnixTimeSeconds(DateTime curTime);
     }
 }

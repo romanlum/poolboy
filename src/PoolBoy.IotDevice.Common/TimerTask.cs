@@ -65,7 +65,7 @@ namespace PoolBoy.IotDevice.Common
                             statusChanged = true;
                         }
                         _deviceService.ChlorinePumpStatus.runId = _deviceService.ChlorinePumpConfig.runId;
-                        _deviceService.ChlorinePumpStatus.startedAt = curTime.ToUnixTimeSeconds();
+                        _deviceService.ChlorinePumpStatus.startedAt = _dateTimeService.ToUnixTimeSeconds(curTime);
 
                     }
                     else if (_deviceService.ChlorinePumpConfig.runId <= _deviceService.ChlorinePumpStatus.runId) //running or already finished

@@ -21,5 +21,10 @@ namespace PoolBoy.IotDevice.Common.Infrastructure
 
 
         }
+
+        public long ToUnixTimeSeconds(DateTime curTime)
+        {
+            return curTime.ToUnixTimeSeconds();
+        }
     }
 }
