@@ -4,15 +4,15 @@ using System.Threading;
 using nanoFramework.Azure.Devices.Client;
 using nanoFramework.Azure.Devices.Shared;
 using nanoFramework.Json;
-using PoolBoy.IotDevice.Infrastructure;
-using PoolBoy.IotDevice.Model;
+using PoolBoy.IotDevice.Common.Infrastructure;
+using PoolBoy.IotDevice.Common.Model;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     /// <summary>
     /// Iot service for communicating with the azure iot hub
     /// </summary>
-    internal class DeviceService
+    public class DeviceService : IDeviceService
     {
         /// <summary>
         /// Retries connecting to iot hub
@@ -24,20 +24,57 @@ namespace PoolBoy.IotDevice
         /// </summary>
         private const int DefaultTimeout = 15000;
 
-        internal int PatchId { get; private set; }
-        internal ChlorinePumpConfig ChlorinePumpConfig { get; private set; }
-        internal PoolPumpConfig PoolPumpConfig { get; private set; }
+        /// <summary>
+        /// Used for synchronizing parameters from server / client
+        /// </summary>
+        public int PatchId { get; private set; }
 
-        internal PoolPumpStatus PoolPumpStatus { get; }
-        internal ChlorinePumpStatus ChlorinePumpStatus { get; }
+        /// <summary>
+        /// Configuration of the chlorine pump
+        /// </summary>
+        public ChlorinePumpConfig ChlorinePumpConfig { get; private set; }
+
+        /// <summary>
+        /// Configures of the pool pump
+        /// </summary>
+        public PoolPumpConfig PoolPumpConfig { get; private set; }
+
+        /// <summary>
+        /// Current applied patch on the client
+        /// </summary>
+        public int LastPatchId { get; set; }
+
+        /// <summary>
+        /// Current status of the pool pump
+        /// </summary>
+        public PoolPumpStatus PoolPumpStatus { get; }
+
+        /// <summary>
+        /// Current status of the chlorine pump
+        /// </summary>
+        public ChlorinePumpStatus ChlorinePumpStatus { get; }
+
+        /// <summary>
+        /// Error property for backend
+        /// </summary>
+        public string Error { get; set; }
 
         private readonly DeviceClient _deviceClient;
         private Twin _deviceTwin;
 
+        /// <summary>
+        /// Creates a new instance
+        /// </summary>
+        /// <param name="deviceId"></param>
+        /// <param name="iotBrokerAddress"></param>
+        /// <param name="sasKey"></param>
         public DeviceService(string deviceId, string iotBrokerAddress, string sasKey)
         {
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
-                azureCert: Certificates.AzureRootCertificateAuthority);
+                azureCert: Certificates.AzureRootCertificateAuthority());
+            ChlorinePumpStatus = new ChlorinePumpStatus();
+            PoolPumpStatus = new PoolPumpStatus();
+            Error = null;
         }
 
         /// <summary>
@@ -76,6 +113,20 @@ namespace PoolBoy.IotDevice
 
             return false;
         }
+
+        /// <summary>
+        /// Sends the reported properties to the server
+        /// </summary>
+        public void SendReportedProperties()
+        {
+            var collection = new TwinCollection();
+            collection.Add(GetJsonName(nameof(LastPatchId)), LastPatchId);
+            collection.Add(GetJsonName(nameof(PoolPumpStatus)), PoolPumpStatus);
+            collection.Add(GetJsonName(nameof(ChlorinePumpStatus)), ChlorinePumpStatus);
+            collection.Add(GetJsonName(nameof(Error)), Error);
+            _deviceClient.UpdateReportedProperties(collection);
+        }
+                
 
         /// <summary>
         /// Parses the desired properties

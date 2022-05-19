@@ -1,5 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
-namespace PoolBoy.IotDevice.Model
+
+namespace PoolBoy.IotDevice.Common.Model
 {
     public class PoolPumpConfig
     {
@@ -7,10 +8,13 @@ namespace PoolBoy.IotDevice.Model
         public bool enabled { get; set; }
         public string startTime { get; set; }
         public string stopTime { get; set; }
+        
 
         public override string ToString()
         {
             return $"{nameof(enabled)}: {enabled}, {nameof(startTime)}: {startTime}, {nameof(stopTime)}: {stopTime}";
         }
+
+
     }
 }

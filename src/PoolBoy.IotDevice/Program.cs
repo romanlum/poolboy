@@ -46,16 +46,16 @@ namespace PoolBoy.IotDevice
 
             ssd1306.ClearScreen();
             ssd1306.DrawString(0, 0, "Connecting...");
-            var taskResult = WLANTask.Run();
+            var taskResult = WlanTask.Run();
             ssd1306.ClearScreen();
 
             if(taskResult)
             {
-                ssd1306.DrawString(0, 0, WLANTask.Ip);
+                ssd1306.DrawString(0, 0, WlanTask.Ip);
             }
             else
             {
-                ssd1306.DrawString(0, 0, $"Error: {WLANTask.ErrorMessage}");
+                ssd1306.DrawString(0, 0, $"Error: {WlanTask.ErrorMessage}");
             }
             ssd1306.Display();
             Thread.Sleep(Timeout.Infinite);

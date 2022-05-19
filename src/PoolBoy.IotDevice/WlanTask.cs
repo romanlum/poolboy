@@ -9,7 +9,7 @@ namespace PoolBoy.IotDevice
     /// <summary>
     /// Task for connecting to a wireless lan
     /// </summary>
-    internal static class WLANTask
+    internal static class WlanTask
     {
         /// <summary>
         /// Ip address 

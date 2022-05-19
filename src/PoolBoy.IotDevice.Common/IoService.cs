@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Device.Gpio;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     /// <summary>
     /// Responsible for controlling the device IOs
     /// </summary>
-    internal class IoService : IDisposable
+    public class IoService : IDisposable, IIoService
     {
 
         private readonly GpioController _gpioController;
@@ -18,7 +18,7 @@ namespace PoolBoy.IotDevice
         /// </summary>
         /// <param name="poolPumpGpIoId"></param>
         /// <param name="chlorinePumpGpIoId"></param>
-        internal IoService(int poolPumpGpIoId, int chlorinePumpGpIoId)
+        public IoService(int poolPumpGpIoId, int chlorinePumpGpIoId)
         {
             _gpioController = new GpioController();
             _poolPumpPin = _gpioController.OpenPin(poolPumpGpIoId);
@@ -39,18 +39,18 @@ namespace PoolBoy.IotDevice
         /// <summary>
         /// Gets wether the pool pump is active
         /// </summary>
-        internal bool PoolPumpActive { get; private set; }
+        public bool PoolPumpActive { get; private set; }
 
         /// <summary>
         /// Gets wether the chlorine pump is active
         /// </summary>
-        internal bool ChlorinePumpActive { get; private set; }
+        public bool ChlorinePumpActive { get; private set; }
 
         /// <summary>
         /// Starts or stops the pool pump
         /// </summary>
         /// <param name="active"></param>
-        internal void ChangePoolPumpStatus(bool active)
+        public void ChangePoolPumpStatus(bool active)
         {
             _poolPumpPin.Write(active ? PinValue.Low : PinValue.High);
         }
@@ -59,7 +59,7 @@ namespace PoolBoy.IotDevice
         /// Starts or stops the chlorine pump
         /// </summary>
         /// <param name="active"></param>
-        internal void ChangeChlorinePumpStatus(bool active)
+        public void ChangeChlorinePumpStatus(bool active)
         {
             _chlorinePumpPin.Write(active ? PinValue.Low : PinValue.High);
         }
@@ -87,4 +87,5 @@ namespace PoolBoy.IotDevice
             _gpioController.Dispose();
         }
     }
+    
 }
