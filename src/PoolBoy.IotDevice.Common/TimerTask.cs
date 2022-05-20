@@ -15,6 +15,7 @@ namespace PoolBoy.IotDevice.Common
         private readonly IDeviceService _deviceService;
         private readonly IIoService _ioService;
         private readonly IDateTimeService _dateTimeService;
+        private readonly IDisplayService _displayService;
 
         /// <summary>
         /// Creates a new instance
@@ -22,11 +23,13 @@ namespace PoolBoy.IotDevice.Common
         /// <param name="deviceService"></param>
         /// <param name="ioService"></param>
         /// <param name="dateTimeService"></param>
-        public TimerTask(IDeviceService deviceService, IIoService ioService, IDateTimeService dateTimeService)
+        /// <param name="displayService"></param>
+        public TimerTask(IDeviceService deviceService, IIoService ioService, IDateTimeService dateTimeService, IDisplayService displayService)
         {
             _deviceService = deviceService;
             _ioService = ioService;
             _dateTimeService = dateTimeService;
+            _displayService = displayService;
         }
 
         /// <summary>
@@ -37,7 +40,26 @@ namespace PoolBoy.IotDevice.Common
             while(!token.IsCancellationRequested)
             {
                 
-                UpdateStatus();
+                try
+                {
+                    UpdateStatus();
+                    _displayService.Data.ChlorinePumpActive = _ioService.ChlorinePumpActive;
+                    _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
+                    var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
+                    var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
+                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2)}:{startTime.Minute}";
+                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2)}:{stopTime.Minute}";
+                    _displayService.Data.ChlorinePumpId = _deviceService.ChlorinePumpConfig.runId;
+                    _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
+                    _displayService.Data.Error = null;
+
+                }
+                catch (Exception e)
+                {
+                    _displayService.Data.Error = e.Message;
+                    
+                }
+                _displayService.Render();
                 Thread.Sleep(LoopTime);
 
             }
@@ -90,6 +112,15 @@ namespace PoolBoy.IotDevice.Common
                     }
 
                 }
+                else
+                {
+                    statusChanged = SetChlorinePumpStatus(false);
+                    if (statusChanged)
+                    {
+                        _deviceService.SendReportedProperties();
+                    }
+                }
+
 
                 //only change pool pump if chlorine pump is not active
                 if (!_deviceService.ChlorinePumpStatus.active)
@@ -138,6 +169,8 @@ namespace PoolBoy.IotDevice.Common
                     _deviceService.Error = e.Message;
                     _deviceService.SendReportedProperties();
                 }
+
+                throw;
             }
         }
 

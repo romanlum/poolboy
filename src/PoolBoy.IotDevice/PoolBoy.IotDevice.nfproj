@@ -84,6 +84,9 @@
     <None Include="packages.config" />
     <None Include="readme.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PoolBoy.IotDevice.Common\PoolBoy.IotDevice.Common.nfproj" />
+  </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
     <ProjectCapabilities>

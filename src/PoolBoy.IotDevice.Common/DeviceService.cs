@@ -47,12 +47,12 @@ namespace PoolBoy.IotDevice.Common
         /// <summary>
         /// Current status of the pool pump
         /// </summary>
-        public PoolPumpStatus PoolPumpStatus { get; }
+        public PoolPumpStatus PoolPumpStatus { get; private set; }
 
         /// <summary>
         /// Current status of the chlorine pump
         /// </summary>
-        public ChlorinePumpStatus ChlorinePumpStatus { get; }
+        public ChlorinePumpStatus ChlorinePumpStatus { get; private set; }
 
         /// <summary>
         /// Error property for backend
@@ -98,6 +98,7 @@ namespace PoolBoy.IotDevice.Common
                         {
                             _deviceClient.TwinUpated += OnDeviceTwinUpdated;
                             ParseDesiredProperties(_deviceTwin.Properties.Desired);
+                            ParseReportedProperties(_deviceTwin.Properties.Reported);
                             return true;
                         }
                         return false;
@@ -143,6 +144,24 @@ namespace PoolBoy.IotDevice.Common
             PoolPumpConfig = DeserializeObject(GetJsonName(nameof(PoolPumpConfig)), collection,typeof(PoolPumpConfig)) as PoolPumpConfig;
             ChlorinePumpConfig = DeserializeObject(GetJsonName(nameof(ChlorinePumpConfig)), collection, typeof(ChlorinePumpConfig)) as ChlorinePumpConfig;
         }
+
+        /// <summary>
+        /// Parses the reported properties
+        /// </summary>
+        /// <param name="collection"></param>
+        private void ParseReportedProperties(TwinCollection collection)
+        {
+            var propertyName = GetJsonName(nameof(LastPatchId));
+            if (collection.Contains(propertyName))
+            {
+                LastPatchId = int.Parse(collection[propertyName].ToString());
+            }
+
+            PoolPumpStatus = DeserializeObject(GetJsonName(nameof(PoolPumpStatus)), collection, typeof(PoolPumpStatus)) as PoolPumpStatus;
+            ChlorinePumpStatus = DeserializeObject(GetJsonName(nameof(ChlorinePumpStatus)), collection, typeof(ChlorinePumpStatus)) as ChlorinePumpStatus;
+        }
+
+
 
         /// <summary>
         /// Converts a property name to a json name (camelCase)
