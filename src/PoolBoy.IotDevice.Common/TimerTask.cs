@@ -90,6 +90,15 @@ namespace PoolBoy.IotDevice.Common
                     }
 
                 }
+                else
+                {
+                    statusChanged = SetChlorinePumpStatus(false);
+                    if (statusChanged)
+                    {
+                        _deviceService.SendReportedProperties();
+                    }
+                }
+
 
                 //only change pool pump if chlorine pump is not active
                 if (!_deviceService.ChlorinePumpStatus.active)
