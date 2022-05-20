@@ -8,7 +8,7 @@ namespace PoolBoy.IotDevice.Common
     /// </summary>
     public class IoService : IDisposable, IIoService
     {
-
+        
         private readonly GpioController _gpioController;
         private readonly GpioPin _poolPumpPin;
         private readonly GpioPin _chlorinePumpPin;
@@ -47,6 +47,10 @@ namespace PoolBoy.IotDevice.Common
         public bool ChlorinePumpActive { get; private set; }
 
         /// <summary>
+        /// Last activation of chlorine pump
+        /// </summary>
+        public DateTime LastChlorinePumpActivation { get; private set; }
+        /// <summary>
         /// Starts or stops the pool pump
         /// </summary>
         /// <param name="active"></param>
@@ -61,6 +65,14 @@ namespace PoolBoy.IotDevice.Common
         /// <param name="active"></param>
         public void ChangeChlorinePumpStatus(bool active)
         {
+            if (active)
+            {
+                LastChlorinePumpActivation = DateTime.UtcNow;
+            }
+            else
+            {
+                LastChlorinePumpActivation = DateTime.MaxValue;
+            }
             _chlorinePumpPin.Write(active ? PinValue.Low : PinValue.High);
         }
         

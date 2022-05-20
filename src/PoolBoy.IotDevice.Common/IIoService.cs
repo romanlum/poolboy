@@ -1,4 +1,6 @@
-﻿namespace PoolBoy.IotDevice.Common
+﻿using System;
+
+namespace PoolBoy.IotDevice.Common
 {
     public interface IIoService
     {
@@ -11,6 +13,11 @@
         /// Gets wether the chlorine pump is active
         /// </summary>
         bool ChlorinePumpActive { get; }
+
+        /// <summary>
+        /// Last activation of chlorine pump
+        /// </summary>
+        DateTime LastChlorinePumpActivation { get; }
 
         /// <summary>
         /// Starts or stops the pool pump

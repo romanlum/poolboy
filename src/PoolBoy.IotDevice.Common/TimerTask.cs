@@ -11,6 +11,7 @@ namespace PoolBoy.IotDevice.Common
     {
 
         private const int LoopTime = 100;
+        private const int MaxChlorineRelayTime = 5;
 
         private readonly IDeviceService _deviceService;
         private readonly IIoService _ioService;
@@ -39,7 +40,7 @@ namespace PoolBoy.IotDevice.Common
         {
             while(!token.IsCancellationRequested)
             {
-                
+
                 try
                 {
                     UpdateStatus();
@@ -57,7 +58,15 @@ namespace PoolBoy.IotDevice.Common
                 catch (Exception e)
                 {
                     _displayService.Data.Error = e.Message;
-                    
+
+                }
+                finally
+                {
+                    /*if ((DateTime.UtcNow - _ioService.LastChlorinePumpActivation).TotalSeconds > MaxChlorineRelayTime)
+                    {
+                        SetChlorinePumpStatus(false);
+                        _deviceService.SendReportedProperties();
+                    }*/
                 }
                 _displayService.Render();
                 Thread.Sleep(LoopTime);
@@ -138,11 +147,7 @@ namespace PoolBoy.IotDevice.Common
                         statusChanged = SetPoolPumpStatus(false);
                     }
 
-                    if (_deviceService.LastPatchId != _deviceService.PatchId)
-                    {
-                        _deviceService.LastPatchId = _deviceService.PatchId;
-                        statusChanged = true;
-                    }
+                    
 
                     //reset error
                     if (_deviceService.Error != null)
@@ -151,6 +156,12 @@ namespace PoolBoy.IotDevice.Common
                         statusChanged = true;
                     }
 
+                }
+
+                if (_deviceService.LastPatchId != _deviceService.PatchId)
+                {
+                    _deviceService.LastPatchId = _deviceService.PatchId;
+                    statusChanged = true;
                 }
 
                 if (statusChanged)
