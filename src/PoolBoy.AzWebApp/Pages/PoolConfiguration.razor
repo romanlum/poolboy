@@ -1,0 +1,135 @@
+﻿@page "/poolconfiguration"
+@using Azure.Messaging.EventHubs.Consumer
+@using Microsoft.Azure.Devices
+@using Microsoft.Azure.Devices.Shared
+@using PoolBoyWebApp.Data
+@using PoolBoyWebApp.Data.Model
+@using PoolBoyWebApp.ViewModel
+@using System.ComponentModel
+@inject IoTHubService iotHubService;
+@implements IDisposable
+
+<PageTitle>Poolboy Konfiguration</PageTitle>
+<div class="main">
+
+
+    <div class="card m-10" >
+        <div class="card-header">
+            <h5 class="card-title text-center">PoolPump</h5>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="startTime">StartTime</label>
+                <input type="time" class="form-control" id="startTime" aria-describedby="starttimeHelp" placeholder="01:00" @bind="ViewModel.PoolPumpStartTime">>
+                <small id="starttimeHelp" class="form-text text-muted">Time when PoolPump Starts.</small>
+            </div>
+            <div class="form-group">
+                <label for="stopTime">StopTime</label>
+                <input type="time" class="form-control" id="stopTime" aria-describedby="stopTimeHelp" placeholder="01:00" @bind="ViewModel.PoolPumpStopTime">
+                <small id="stopTimeHelp" class="form-text text-muted"> Time when PoolPump Stops.</small>
+            </div>
+            @if (ViewModel.PatchId > ViewModel.LastPatchId)
+            {
+                <button class="btn btn-primary" type="button" disabled>
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="sr-only">Save PoolConfiguration...</span>
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-primary" @onclick="ViewModel.UpdatePoolPumpConfiguration">Save PoolConfiguration</button>
+            }
+        </div>
+    </div>
+
+    <div class="card m-10" style="margin-top: 10px">
+        <div class="card-header">
+            <h5 class="card-title text-center">Chlorine Pump</h5>
+        </div>
+        <div class="card-body">
+            <div class="form-group">
+                <label for="running">Is Running RunId=@ViewModel.ChlorinePumpRunId</label>
+                <input type="checkbox" lass="form-control" id="running" aria-describedby="runningHelp" @bind="ViewModel.ChlorinePumpRunning" disabled>
+                <small id="runningHelp" class="form-text text-muted"> Is Chlorinepump currently Running.</small>
+            </div>
+            <div class="form-group">
+                <label for="runtime">Runtime</label>
+                <input type="int" class="form-control" id="runtime" aria-describedby="runtimeHelp" placeholder="100" @bind="ViewModel.ChlorinePumpDuration">>
+                <small id="runtimeHelp" class="form-text text-muted"> Duration how Long Chlorine Pump Should Work.</small>
+            </div>
+            @if (ViewModel.ChlorinePumpRunning == true)
+            {
+                @if (ViewModel.PatchId > ViewModel.LastPatchId)
+                {
+                    <button class="btn btn-primary" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="sr-only">Stop ChlorinPump...</span>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary" @onclick="ViewModel.StopChlorinePump">Stop ChlorinPump</button>
+                }
+            }
+            else
+            {
+                @if (ViewModel.PatchId > ViewModel.LastPatchId)
+                {
+                    <button class="btn btn-primary" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="sr-only">Start ChlorinPump...</span>
+                    </button>
+                }
+                else
+                {
+                    <button class="btn btn-primary" @onclick="ViewModel.StartChlorinePump">Start ChlorinPump</button>
+                }
+            }
+
+        </div>
+    </div>
+    <div class="card m-10"style="margin-top: 10px">
+        <div class="card-header">
+            <h5 class="card-title text-center">General Infos</h5>
+        </div>        <div class="form-group">
+            <label for="patchId">Patch Id</label>
+            <input type="int" class="form-control" id="patchId" aria-describedby="patchIdHelp" @bind="ViewModel.PatchId">>
+            <small id="patchIdHelp" class="form-text text-muted"> Konfiguration with PatchId sent to device.</small>
+        </div>
+        <div class="form-group">
+            <label for="lastPatchId">Last Patch Id</label>
+            <input type="int" class="form-control" id="lastPatchId" aria-describedby="lastPatchIdHelp" @bind="ViewModel.LastPatchId">>
+            <small id="lastPatchIdHelp" class="form-text text-muted"> Konfiguration with PatchId confirmend by device.</small>
+        </div>
+        <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">EventStream</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" rows="3" @bind=ViewModel.EventStream></textarea>
+        </div>
+    </div>
+</div>
+@code {
+    protected PoolConfigurationVM ViewModel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        ViewModel = new PoolConfigurationVM(iotHubService);
+        ViewModel.PropertyChanged += OnPropertyChangedHandler;
+        await ViewModel.InitializeAsync();
+
+    }
+    async void OnPropertyChangedHandler(object sender, PropertyChangedEventArgs e)
+    {
+        await InvokeAsync(() =>
+        {
+            Console.WriteLine("RaffstoreComponent State has changed" + sender + " EventArgs = " + e);
+            StateHasChanged();
+        });
+
+    }
+    public void Dispose()
+    {
+        ViewModel.PropertyChanged -= OnPropertyChangedHandler;
+    }
+
+
+}

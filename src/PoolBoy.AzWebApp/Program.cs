@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using PoolBoyWebApp.Data;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,8 +26,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor()
     .AddMicrosoftIdentityConsentHandler();
-builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddSingleton<IoTHubService>();
+builder.Services.AddLocalization();
 
 var app = builder.Build();
 
@@ -50,5 +51,9 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
+app.UseRequestLocalization("de-AT");
+
+CultureInfo.CurrentCulture = new CultureInfo("de-AT");
+CultureInfo.CurrentUICulture = new CultureInfo("de-AT");
 
 app.Run();
