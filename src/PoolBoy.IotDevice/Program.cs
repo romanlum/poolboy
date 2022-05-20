@@ -20,91 +20,42 @@ namespace PoolBoy.IotDevice
 
 
             Debug.WriteLine($"Hello from nanoFramework! {Helpers.Helpers.GetMacId()}");
-
-
-            var width = 16;
-            var height = 16;
-            var ssd1306 = new Ssd1306(
-                I2cDevice.Create(
-                    new I2cConnectionSettings(
-                        1,
-                        Ssd1306.DefaultI2cAddress,
-                        I2cBusSpeed.FastMode)),
-                Ssd13xx.DisplayResolution.OLED128x64);
-
-            ssd1306.ClearScreen();
-            ssd1306.Font = new BasicFont();
-
-
-           
-
-
-            ssd1306.ClearScreen();
-            ssd1306.DrawString(0, 0, "Connecting...");
+            DisplayService displayService = new DisplayService();
+            displayService.Initialize();
+            displayService.Data.IpAddress = "Connecting";
+            displayService.Render();
             var taskResult = WlanTask.Run();
-            ssd1306.ClearScreen();
-
+            
             if(taskResult)
             {
-                ssd1306.DrawString(0, 0, WlanTask.Ip);
+                displayService.Data.IpAddress = WlanTask.Ip;
             }
             else
             {
-                ssd1306.DrawString(0, 0, $"Error: {WlanTask.ErrorMessage}");
+                displayService.Data.IpAddress = $"Error: {WlanTask.ErrorMessage}";
             }
            
-            ssd1306.Display();
-
-            //IoService service = new IoService(25, 26);
-            //Thread.Sleep(5000);
-            //ssd1306.DrawString(0,10,"PoolPump: " +service.PoolPumpActive.ToString());
-            //ssd1306.DrawString(0, 20, "ChlorinePump: " + service.ChlorinePumpActive.ToString());
-
-            //ssd1306.Display();
-            //Thread.Sleep(2000);
-            //service.ChangePoolPumpStatus(true);
-            //service.ChangeChlorinePumpStatus(true);
-            //Thread.Sleep(2000);
-
-            //ssd1306.DrawString(0, 10, "PoolPump: " + service.PoolPumpActive.ToString());
-            //ssd1306.DrawString(0, 20, "ChlorinePump: " + service.ChlorinePumpActive.ToString());
-
-            //ssd1306.Display();
-
-            //Thread.Sleep(3000);
-            //service.ChangePoolPumpStatus(false);
-            //service.ChangeChlorinePumpStatus(false);
-            //Thread.Sleep(1000);
-
-            //ssd1306.DrawString(0, 10, "PoolPump: " + service.PoolPumpActive.ToString());
-            //ssd1306.DrawString(0, 20, "ChlorinePump: " + service.ChlorinePumpActive.ToString());
-
-            //ssd1306.Display();
-
-          
+            displayService.Render();
             string DeviceID =$"poolboy-{Helpers.Helpers.GetMacId()}";
             const string IotBrokerAddress = "poolboyhub.azure-devices.net";
             const string SasKey = "6QJ3Oh1c4ObtvJIjMW8FYYbQI4ndnG1m9cACg4+deHg=";
 
             var service = new DeviceService(DeviceID, IotBrokerAddress, SasKey);
-            ssd1306.DrawString(0,10,"Connecting to hub...");
-            ssd1306.Display();
             if (service.Connect())
             {
-                ssd1306.DrawString(0, 10, "Connected to hub");
+                displayService.Data.HubConnectionState = true;
+                TimerTask timer = new TimerTask(service, new IoService(25, 26), new DateTimeService(), displayService);
+                timer.RunLoop();
+                
             }
             else
             {
-                ssd1306.DrawString(0, 10, "failed to connect.");
+                displayService.Data.HubConnectionState = false;
             }
-            ssd1306.Display();
-            TimerTask timer = new TimerTask(service, new IoService(25, 26), new DateTimeService());
-            timer.RunLoop();
-            Thread.Sleep(Timeout.Infinite);
+            displayService.Render();
 
-            // Browse our samples repository: https://github.com/nanoframework/samples
-            // Check our documentation online: https://docs.nanoframework.net/
-            // Join our lively Discord community: https://discord.gg/gCyBu8T
+            Thread.Sleep(Timeout.Infinite);
+            
         }
     }
 }
