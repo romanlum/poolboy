@@ -38,7 +38,7 @@ namespace PoolBoy.IotDevice
             displayService.Render();
             string DeviceID =$"poolboy-{Helpers.Helpers.GetMacId()}";
             const string IotBrokerAddress = "poolboyhub.azure-devices.net";
-            const string SasKey = "6QJ3Oh1c4ObtvJIjMW8FYYbQI4ndnG1m9cACg4+deHg=";
+            const string SasKey = "xxxx";
 
             var service = new DeviceService(DeviceID, IotBrokerAddress, SasKey);
             if (service.Connect())
