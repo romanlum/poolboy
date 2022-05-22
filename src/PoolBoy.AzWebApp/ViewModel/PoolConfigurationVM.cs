@@ -20,6 +20,7 @@ namespace PoolBoyWebApp.ViewModel
 
         public int ChlorinePumpDuration { get; set; }
         public bool? ChlorinePumpRunning { get; set; }
+        public bool? PoolPumpRunning { get; set; }
         public int ChlorinePumpRunId { get; set; }
         public string EventStream { get; set; }
 
@@ -35,6 +36,7 @@ namespace PoolBoyWebApp.ViewModel
             ChlorinePumpDuration = _deviceState.ChlorinePumpConfig.runtime;
             ChlorinePumpRunId = _deviceState.ChlorinePumpConfig.runId;
             ChlorinePumpRunning = _deviceState.ChlorinePumpStatus?.active;
+            PoolPumpRunning = _deviceState.PoolPumpStatus?.active;
             OnPropertyChanged(nameof(PoolPumpStartTime));
 
         }
@@ -56,6 +58,7 @@ namespace PoolBoyWebApp.ViewModel
             ChlorinePumpDuration = _deviceState.ChlorinePumpConfig.runtime;
             ChlorinePumpRunId = _deviceState.ChlorinePumpConfig.runId;
             ChlorinePumpRunning = _deviceState.ChlorinePumpStatus?.active;
+            PoolPumpRunning = _deviceState.PoolPumpStatus?.active;
             OnPropertyChanged(nameof(PoolPumpStartTime));
         }
         public void Dispose()

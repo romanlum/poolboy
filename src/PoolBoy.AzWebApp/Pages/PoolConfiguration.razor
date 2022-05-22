@@ -13,9 +13,34 @@
 <div class="main">
 
 
-    <div class="card m-10" >
+    <div class="card m-10">
         <div class="card-header">
-            <h5 class="card-title text-center">PoolPump</h5>
+            <div class="grid">
+                <div class="row">
+                    @if (ViewModel.PoolPumpRunning == true)
+                    {
+                        <div class="col-2 justify-content-start">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-2 justify-content-start">
+                            <span class="oi oi-media-pause"></span>
+                        </div>
+                    }
+
+                    <div class="col-10">
+                        <h5 class="card-title text-center">
+                            Pool Pump
+                        </h5>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
         <div class="card-body">
             <div class="form-group">
@@ -44,11 +69,33 @@
 
     <div class="card m-10" style="margin-top: 10px">
         <div class="card-header">
-            <h5 class="card-title text-center">Chlorine Pump</h5>
+            <div class="grid">
+                <div class="row">
+                    @if (ViewModel.ChlorinePumpRunning == true)
+                    {
+                        <div class="col-2 justify-content-start">
+                            <div class="spinner-border text-success" role="status">
+                                <span class="sr-only"></span>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-2 justify-content-start">
+                            <span class="oi oi-media-pause"></span>
+                        </div>
+                    }
+                     <div class="col-10">
+                        <h5 class="card-title text-center">
+                            Chlorine Pump
+                        </h5>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="form-group">
-                <label for="running">Is Running RunId=@ViewModel.ChlorinePumpRunId</label>
+                <label for="running">RunId=@ViewModel.ChlorinePumpRunId</label>
                 <input type="checkbox" lass="form-control" id="running" aria-describedby="runningHelp" @bind="ViewModel.ChlorinePumpRunning" disabled>
                 <small id="runningHelp" class="form-text text-muted"> Is Chlorinepump currently Running.</small>
             </div>
@@ -88,7 +135,7 @@
 
         </div>
     </div>
-    <div class="card m-10"style="margin-top: 10px">
+    <div class="card m-10" style="margin-top: 10px">
         <div class="card-header">
             <h5 class="card-title text-center">General Infos</h5>
         </div>        <div class="form-group">
