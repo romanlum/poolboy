@@ -13,8 +13,8 @@ This document explains the used schema for the poolboy device twin
 |Property| Description | Example value|
 |---|---|---|
 |lastPatchId|property used to check if the desired properties are acknowleged|  1 |
-|poolPump| Status of the pool pump  | ```{ active: true}```|
-|chlorinePump| Status of the clorine pump|```{ active:true, runId: 1, startedAt: 1651754852  }```|
+|poolPumpStatus| Status of the pool pump  | ```{ active: true}```|
+|chlorinePumpStatus| Status of the clorine pump|```{ active:true, runId: 1, startedAt: 1651754852  }```|
 
 ## Json Schemas 
 

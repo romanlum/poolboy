@@ -8,9 +8,9 @@ namespace PoolBoyWebApp.Data.Model
 
         [JsonPropertyName("lastPatchId")]
         public int LastPatchId { get; set; }
-        [JsonPropertyName("poolPump")]
+        [JsonPropertyName("poolPumpStatus")]
         public PoolPumpStatus PoolPumpStatus { get; set; }
-        [JsonPropertyName("chlorinePump")]
+        [JsonPropertyName("chlorinePumpStatus")]
         public ChlorinePumpStatus ChlorinePumpStatus { get; set; }
     }
 }

@@ -2,8 +2,8 @@
 { 
     public class ChlorinePumpStatus
     {
-        internal bool active { get; set; }
-        internal int runId { get; set; }
-        internal long startedAt { get; set; }
+        public bool active { get; set; }
+        public int runId { get; set; }
+        public long startedAt { get; set; }
     }
 }
