@@ -35,6 +35,12 @@ namespace PoolBoy.IotDevice.Common
         ChlorinePumpStatus ChlorinePumpStatus { get; }
 
         /// <summary>
+        /// Hub connection state
+        /// </summary>
+        public bool Connected { get; }
+        
+
+        /// <summary>
         /// Error property for backend
         /// </summary>
         string Error { get; set; }

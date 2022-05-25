@@ -53,6 +53,7 @@ namespace PoolBoy.IotDevice.Common
                     _displayService.Data.ChlorinePumpId = _deviceService.ChlorinePumpConfig.runId;
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;
+                    _displayService.Data.HubConnectionState = _deviceService.Connected;
 
                 }
                 catch (Exception e)

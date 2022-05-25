@@ -59,6 +59,11 @@ namespace PoolBoy.IotDevice.Common
         /// </summary>
         public string Error { get; set; }
 
+        /// <summary>
+        /// Defines if the connection to the hub is ok
+        /// </summary>
+        public bool Connected { get; private set; }
+
         private readonly DeviceClient _deviceClient;
         private Twin _deviceTwin;
 
@@ -91,6 +96,8 @@ namespace PoolBoy.IotDevice.Common
                     var result = _deviceClient.Open();
                     if (result)
                     {
+                        Connected = true;
+                        _deviceClient.StatusUpdated += OnStatusUpdated;
                         CancellationTokenSource cancellationToken = new CancellationTokenSource(DefaultTimeout);
                         _deviceTwin = _deviceClient.GetTwin(cancellationToken.Token);
                         Debug.WriteLine(_deviceClient.IsConnected + " " + _deviceClient.IoTHubStatus);
@@ -113,6 +120,18 @@ namespace PoolBoy.IotDevice.Common
             }
 
             return false;
+        }
+
+        private void OnStatusUpdated(object sender, StatusUpdatedEventArgs e)
+        {
+            if(e.IoTHubStatus.Status == Status.Disconnected)
+            {
+                Connected = false;
+                _deviceClient.StatusUpdated -= OnStatusUpdated;
+                _deviceClient.TwinUpated -= OnDeviceTwinUpdated;
+                _deviceClient.Close();
+                Connect();
+            }
         }
 
         /// <summary>
