@@ -21,16 +21,17 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Services
         private int CalculateRuntimeInSecondsByChlorineInGramm(int chlorine)
         {
             //Todo. Calulate gramm into ms of runtime for injection pump
-            return chlorine;
+            //25g pro minuten
+            return (chlorine/25) * 60;
         }
-        public async Task<int> GetChlorinePumpRuntimeByRecommendationsAndOrp(IEnumerable<Recommendation> recommendations, int orp)
+        public async Task<Tuple<int, IEnumerable<Recommendation>>> GetChlorinePumpRuntimeByRecommendationsAndOrp(IEnumerable<Recommendation> recommendations, int orp)
         {
             //Check if Orp is in a valid range --> if orp is too hight don't put chlorine into the pool
             //Todo: Check logic with orp is valid by pool master
             if(orp >= int.Parse(_configuration["maxOrpToPutChlorine"]))
             {
-                _logger.LogInformation("ORP {0} is higher than max ORP allowed to Put Chlorine into the Pool");
-                return 0; 
+                _logger.LogInformation("ORP {0} is higher than max ORP allowed to Put Chlorine into the Pool", orp);
+                return Tuple.Create(0, (new List<Recommendation>()) as IEnumerable<Recommendation>);
             }
             var chlorineRecommendations = recommendations.Where(r => r.Title.StartsWith("Add") && r.Title.Contains("chlorine"));
             var totalAmount = 0;
@@ -40,7 +41,7 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Services
                 totalAmount += int.Parse(new String(recommendation.Title.Where(c => Char.IsDigit(c)).ToArray()));
             }
             _logger.LogInformation("Calculated Total Amount of Chlorine: {0}", totalAmount);
-            return CalculateRuntimeInSecondsByChlorineInGramm(totalAmount);
+            return Tuple.Create(CalculateRuntimeInSecondsByChlorineInGramm(totalAmount),chlorineRecommendations);
         }
     }
 }
