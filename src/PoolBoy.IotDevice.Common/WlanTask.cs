@@ -1,31 +1,31 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading;
 using nanoFramework.Networking;
 
-namespace PoolBoy.IotDevice
+namespace PoolBoy.IotDevice.Common
 {
     /// <summary>
     /// Task for connecting to a wireless lan
     /// </summary>
-    internal static class WlanTask
+    public static class WlanTask
     {
         /// <summary>
         /// Ip address 
         /// </summary>
-        internal static string Ip {get; private set;}
+        public static string Ip {get; private set;}
 
 
         /// <summary>
         /// Error message if task fails
         /// </summary>
-        internal static string ErrorMessage { get; private set; }
+        public static string ErrorMessage { get; private set; }
 
-        internal static bool Run()
+        public static bool Run()
         {
             CancellationTokenSource cs = new(10000);
             var success = WiFiNetworkHelper.Reconnect(true, token: cs.Token);
+            
             if (!success)
             {
                 // Something went wrong, you can get details with the ConnectionError property:
@@ -39,5 +39,9 @@ namespace PoolBoy.IotDevice
             Ip = NetworkInterface.GetAllNetworkInterfaces()[0].IPv4Address;
             return true;
         }
+
+        public static bool Connected => WiFiNetworkHelper.Status == NetworkHelperStatus.NetworkIsReady;
+
+        
     }
 }

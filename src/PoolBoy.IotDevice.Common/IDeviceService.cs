@@ -34,16 +34,16 @@ namespace PoolBoy.IotDevice.Common
         /// </summary>
         ChlorinePumpStatus ChlorinePumpStatus { get; }
 
-        /// <summary>
-        /// Hub connection state
-        /// </summary>
-        public bool Connected { get; }
-        
 
         /// <summary>
         /// Error property for backend
         /// </summary>
         string Error { get; set; }
+
+        /// <summary>
+        /// Defines if the connection to the hub is ok
+        /// </summary>
+        bool Connected { get; }
 
         /// <summary>
         /// Connects to iot hub using default retries
@@ -55,5 +55,7 @@ namespace PoolBoy.IotDevice.Common
         /// Sends the reported properties to the server
         /// </summary>
         void SendReportedProperties();
+
+        bool Reconnect();
     }
 }

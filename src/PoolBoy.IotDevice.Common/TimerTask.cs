@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using PoolBoy.IotDevice.Common.Infrastructure;
 
@@ -43,7 +44,23 @@ namespace PoolBoy.IotDevice.Common
 
                 try
                 {
-                    UpdateStatus();
+                    if (!WlanTask.Connected)
+                    {
+                        WlanTask.Run();
+                    }
+                    
+                    if (!_deviceService.Connected)
+                    {
+                        _deviceService.Reconnect();
+                    }
+                    else
+                    {
+                        UpdateStatus();
+                    }
+                
+
+                     
+                    
                     _displayService.Data.ChlorinePumpActive = _ioService.ChlorinePumpActive;
                     _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
                     var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
@@ -54,6 +71,7 @@ namespace PoolBoy.IotDevice.Common
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;
                     _displayService.Data.HubConnectionState = _deviceService.Connected;
+                    _displayService.Data.IpAddress = WlanTask.Connected ? WlanTask.Ip : WlanTask.ErrorMessage;
 
                 }
                 catch (Exception e)

@@ -14,10 +14,14 @@ namespace PoolBoy.IotDevice.Common
     /// </summary>
     public class DeviceService : IDeviceService
     {
+        private readonly string _deviceId;
+        private readonly string _iotBrokerAddress;
+        private readonly string _sasKey;
+
         /// <summary>
         /// Retries connecting to iot hub
         /// </summary>
-        private const int NumberOfRetries = 10;
+        private const int NumberOfRetries = 2;
 
         /// <summary>
         /// Default timeout for azure calls
@@ -64,7 +68,7 @@ namespace PoolBoy.IotDevice.Common
         /// </summary>
         public bool Connected { get; private set; }
 
-        private readonly DeviceClient _deviceClient;
+        private DeviceClient _deviceClient;
         private Twin _deviceTwin;
 
         /// <summary>
@@ -75,11 +79,27 @@ namespace PoolBoy.IotDevice.Common
         /// <param name="sasKey"></param>
         public DeviceService(string deviceId, string iotBrokerAddress, string sasKey)
         {
+            _deviceId = deviceId;
+            _iotBrokerAddress = iotBrokerAddress;
+            _sasKey = sasKey;
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
                 azureCert: Certificates.AzureRootCertificateAuthority());
             ChlorinePumpStatus = new ChlorinePumpStatus();
             PoolPumpStatus = new PoolPumpStatus();
             Error = null;
+        }
+
+        public bool Reconnect()
+        {
+            if (_deviceClient != null)
+            {
+                _deviceClient.StatusUpdated -= OnStatusUpdated;
+                _deviceClient.TwinUpated -= OnDeviceTwinUpdated;
+                _deviceClient.Dispose();
+                _deviceClient = new DeviceClient(_iotBrokerAddress, _deviceId, _sasKey);
+                
+            }
+            return Connect();
         }
 
         /// <summary>
@@ -88,7 +108,6 @@ namespace PoolBoy.IotDevice.Common
         /// <returns></returns>
         public bool Connect()
         {
-            
             for (int i = 0; i < NumberOfRetries; i++)
             {
                 try
@@ -111,10 +130,9 @@ namespace PoolBoy.IotDevice.Common
                         return false;
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     Thread.Sleep(1000);
-                    Debug.WriteLine(ex.ToString());
                     // ignored
                 }
             }
@@ -124,14 +142,7 @@ namespace PoolBoy.IotDevice.Common
 
         private void OnStatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
-            if(e.IoTHubStatus.Status == Status.Disconnected)
-            {
-                Connected = false;
-                _deviceClient.StatusUpdated -= OnStatusUpdated;
-                _deviceClient.TwinUpated -= OnDeviceTwinUpdated;
-                _deviceClient.Close();
-                Connect();
-            }
+            
         }
 
         /// <summary>
