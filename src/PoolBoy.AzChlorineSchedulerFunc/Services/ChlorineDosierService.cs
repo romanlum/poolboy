@@ -31,7 +31,7 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Services
             if(orp >= int.Parse(_configuration["maxOrpToPutChlorine"]))
             {
                 _logger.LogInformation("ORP {0} is higher than max ORP allowed to Put Chlorine into the Pool", orp);
-                return Tuple.Create(0, (new List<Recommendation>()) as IEnumerable<Recommendation>);
+                return Tuple.Create(0, Enumerable.Empty<Recommendation>());
             }
             var chlorineRecommendations = recommendations.Where(r => r.Title.StartsWith("Add") && r.Title.Contains("chlorine"));
             var totalAmount = 0;
