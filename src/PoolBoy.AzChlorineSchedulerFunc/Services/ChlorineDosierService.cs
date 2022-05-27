@@ -21,7 +21,7 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Services
         private int CalculateRuntimeInSecondsByChlorineInGramm(int chlorine)
         {
             //Todo. Calulate gramm into ms of runtime for injection pump
-            //25g pro minuten
+            //25ml pro minuten
             return (chlorine/25) * 60;
         }
         public async Task<Tuple<int, IEnumerable<Recommendation>>> GetChlorinePumpRuntimeByRecommendationsAndOrp(IEnumerable<Recommendation> recommendations, int orp)

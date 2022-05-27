@@ -15,8 +15,7 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Models.Ondilo
         [JsonPropertyName("value")]
         public int Value { get; set; }
 
-        [JsonPropertyName("value_time")]
-        public DateTime ValueTime { get; set; }
+       
 
         [JsonPropertyName("is_valid")]
         public bool IsValid { get; set; }

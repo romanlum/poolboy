@@ -72,7 +72,7 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Services
                 }
 
                 var lastMessares = JsonSerializer.Deserialize<IEnumerable<MeasurementResult>>(content);
-                var lastOrpMeasurement = lastMessares?.Where(m => m.IsValid && m.DataType == "orp").OrderByDescending(m => m.ValueTime).FirstOrDefault();
+                var lastOrpMeasurement = lastMessares?.Where(m => m.IsValid && m.DataType == "orp").FirstOrDefault();
                 if (lastOrpMeasurement != null)
                 {
                     return lastOrpMeasurement.Value;

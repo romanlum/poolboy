@@ -20,12 +20,11 @@ namespace PoolBoy.AzChlorineSchedulerFunc
             _ondiloService = ondiloService;
             _doesierService = dosierService;
         }
-
+        //0 0 6-20 * * * 
         [Function("ChlorinePumpConfigurationFunc")]
-        public async Task Run([TimerTrigger("0 0 6-20 * * * ")] MyInfo myTimer)
+        public async Task Run([TimerTrigger("1 * * * * *")] MyInfo myTimer)
         {
             _logger.LogInformation($"C# Timer trigger function executed at: {DateTime.Now}");
-            _logger.LogInformation($"Next timer schedule at: {myTimer.ScheduleStatus.Next}");
             var recommendations = await _ondiloService.GetRecommendationsAsync();
             var orpValue = await _ondiloService.GetCurrentOrpValue();
             _logger.LogInformation($"Got Recommendations {recommendations} and OprValue {orpValue}");
