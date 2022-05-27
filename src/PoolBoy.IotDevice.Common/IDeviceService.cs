@@ -51,7 +51,7 @@ namespace PoolBoy.IotDevice.Common
         /// <returns></returns>
         bool Connect();
 
-        /// <summary>
+        /// <summary>   
         /// Sends the reported properties to the server
         /// </summary>
         void SendReportedProperties();

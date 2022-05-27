@@ -51,7 +51,15 @@ namespace PoolBoy.IotDevice.Common
                     
                     if (!_deviceService.Connected)
                     {
-                        _deviceService.Reconnect();
+                        try
+                        {
+                            _deviceService.Reconnect();
+                        }
+                        catch (Exception)
+                        {
+                            
+                        }
+                        
                     }
                     else
                     {

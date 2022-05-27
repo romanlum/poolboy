@@ -66,7 +66,7 @@ namespace PoolBoy.IotDevice.Common
         /// <summary>
         /// Defines if the connection to the hub is ok
         /// </summary>
-        public bool Connected { get; private set; }
+        public bool Connected => _deviceId != null && _deviceClient.IsConnected;
 
         private DeviceClient _deviceClient;
         private Twin _deviceTwin;
@@ -91,15 +91,8 @@ namespace PoolBoy.IotDevice.Common
 
         public bool Reconnect()
         {
-            if (_deviceClient != null)
-            {
-                _deviceClient.StatusUpdated -= OnStatusUpdated;
-                _deviceClient.TwinUpated -= OnDeviceTwinUpdated;
-                _deviceClient.Dispose();
-                _deviceClient = new DeviceClient(_iotBrokerAddress, _deviceId, _sasKey);
-                
-            }
-            return Connect();
+            _deviceClient.Reconnect();
+            return _deviceClient.IsConnected;
         }
 
         /// <summary>
@@ -115,7 +108,6 @@ namespace PoolBoy.IotDevice.Common
                     var result = _deviceClient.Open();
                     if (result)
                     {
-                        Connected = true;
                         _deviceClient.StatusUpdated += OnStatusUpdated;
                         CancellationTokenSource cancellationToken = new CancellationTokenSource(DefaultTimeout);
                         _deviceTwin = _deviceClient.GetTwin(cancellationToken.Token);
@@ -189,6 +181,8 @@ namespace PoolBoy.IotDevice.Common
 
             PoolPumpStatus = DeserializeObject(GetJsonName(nameof(PoolPumpStatus)), collection, typeof(PoolPumpStatus)) as PoolPumpStatus;
             ChlorinePumpStatus = DeserializeObject(GetJsonName(nameof(ChlorinePumpStatus)), collection, typeof(ChlorinePumpStatus)) as ChlorinePumpStatus;
+            PoolPumpStatus ??= new PoolPumpStatus();
+            ChlorinePumpStatus ??= new ChlorinePumpStatus();
         }
 
 
