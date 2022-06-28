@@ -26,6 +26,24 @@ namespace PoolBoy.IotDevice.Test
             _timeService = new Mock<IDateTimeService>();
         }
 
+        [Fact]
+        public void EmptyConfigTest()
+        {
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
+            var config = new PoolPumpConfig();
+            var chlorineConfig = new ChlorinePumpConfig();
+            _deviceService.Setup(x => x.PoolPumpConfig).Returns(config);
+            _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
+            _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 0, 0, 0));
+
+            task.UpdateStatus();
+            Assert.False(_ioService.Object.PoolPumpActive);
+            Assert.False(_ioService.Object.ChlorinePumpActive);
+            Assert.Null(_deviceService.Object.Error);
+
+        }
+
+
         [Theory]
         [InlineData(13, 00, "13:00", "13:03", true)]
         [InlineData(13,00,"12:00","13:03",true)]
