@@ -7,7 +7,7 @@ Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "PoolBoy.IotDevice", "PoolBo
 EndProject
 Project("{11A8DD76-328B-46DF-9F39-F559912D0360}") = "PoolBoy.IotDevice.Common", "PoolBoy.IotDevice.Common\PoolBoy.IotDevice.Common.nfproj", "{04E6D626-F3B8-4A0C-94E5-1B6B8A29CBF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PoolBoy.IotDevice.Test", "PoolBoy.IotDevice.Test\PoolBoy.IotDevice.Test.csproj", "{871467E6-4B26-4B25-B16A-BCA8AFE256AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PoolBoy.IotDevice.Test", "PoolBoy.IotDevice.Test\PoolBoy.IotDevice.Test.csproj", "{871467E6-4B26-4B25-B16A-BCA8AFE256AC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
