@@ -44,10 +44,12 @@ namespace PoolBoy.IotDevice.Common
 
                 try
                 {
+#if NANOFRAMEWORK_1_0
                     if (!WlanTask.Connected)
                     {
                         WlanTask.Run();
                     }
+#endif
                     
                     if (!_deviceService.Connected)
                     {
@@ -79,7 +81,9 @@ namespace PoolBoy.IotDevice.Common
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;
                     _displayService.Data.HubConnectionState = _deviceService.Connected;
+#if NANOFRAMEWORK_1_0
                     _displayService.Data.IpAddress = WlanTask.Connected ? WlanTask.Ip : WlanTask.ErrorMessage;
+#endif
 
                 }
                 catch (Exception e)
@@ -117,11 +121,9 @@ namespace PoolBoy.IotDevice.Common
                     //chlorine pump should be enabled
                     if (_deviceService.ChlorinePumpConfig.runId > _deviceService.ChlorinePumpStatus.runId && _deviceService.ChlorinePumpConfig.runtime > 0)
                     {
-                        statusChanged = SetPoolPumpStatus(true);
-                        if (SetChlorinePumpStatus(true))
-                        {
-                            statusChanged = true;
-                        }
+                        statusChanged = true;
+                        SetPoolPumpStatus(true);
+                        SetChlorinePumpStatus(true);
                         _deviceService.ChlorinePumpStatus.runId = _deviceService.ChlorinePumpConfig.runId;
                         _deviceService.ChlorinePumpStatus.startedAt = _dateTimeService.ToUnixTimeSeconds(curTime);
 
@@ -142,6 +144,7 @@ namespace PoolBoy.IotDevice.Common
                             statusChanged = SetChlorinePumpStatus(false);
                         }
                     }
+
                     if (statusChanged)
                     {
                         _deviceService.SendReportedProperties();
@@ -151,9 +154,16 @@ namespace PoolBoy.IotDevice.Common
                 else
                 {
                     statusChanged = SetChlorinePumpStatus(false);
+                    if (_deviceService.ChlorinePumpStatus.runId != _deviceService.ChlorinePumpConfig.runId)
+                    {
+                        _deviceService.ChlorinePumpStatus.runId = _deviceService.ChlorinePumpConfig.runId;
+                        statusChanged = true;
+                    }
+  
                     if (statusChanged)
                     {
                         _deviceService.SendReportedProperties();
+              
                     }
                 }
 
@@ -224,15 +234,23 @@ namespace PoolBoy.IotDevice.Common
                 if (!_ioService.PoolPumpActive)
                 {
                     _ioService.ChangePoolPumpStatus(true);
+                }
+                
+                if (!_deviceService.PoolPumpStatus.active)
+                {
+                    
                     _deviceService.PoolPumpStatus.active = true;
                     return true;
                 }
             }
             else
             {
-                if (_ioService.PoolPumpActive)
+                if(_ioService.PoolPumpActive)
                 {
                     _ioService.ChangePoolPumpStatus(false);
+                }
+                if (_deviceService.PoolPumpStatus.active)
+                {
                     _deviceService.PoolPumpStatus.active = false;
                     return true;
                 }
@@ -252,6 +270,11 @@ namespace PoolBoy.IotDevice.Common
                 if (!_ioService.ChlorinePumpActive)
                 {
                     _ioService.ChangeChlorinePumpStatus(true);
+                }
+                
+                if (!_deviceService.ChlorinePumpStatus.active)
+                {
+                    
                     _deviceService.ChlorinePumpStatus.active = true;
                     return true;
                 }
@@ -261,6 +284,11 @@ namespace PoolBoy.IotDevice.Common
                 if (_ioService.ChlorinePumpActive)
                 {
                     _ioService.ChangeChlorinePumpStatus(false);
+                }
+                
+                if (_deviceService.ChlorinePumpStatus.active)
+                {
+                    
                     _deviceService.ChlorinePumpStatus.active = false;
                     return true;
                 }

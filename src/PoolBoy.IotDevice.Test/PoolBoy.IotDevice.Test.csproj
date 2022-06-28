@@ -10,11 +10,13 @@
 
   <ItemGroup>
     <Compile Include="..\PoolBoy.IotDevice.Common\IDeviceService.cs" Link="IDeviceService.cs" />
+    <Compile Include="..\PoolBoy.IotDevice.Common\IDisplayService.cs" Link="IDisplayService.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\IIoService.cs" Link="IIoService.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Infrastructure\DateTimeExtension.cs" Link="DateTimeExtension.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Infrastructure\IDateTimeService.cs" Link="IDateTimeService.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\ChlorinePumpConfig.cs" Link="ChlorinePumpConfig.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\ChlorinePumpStatus.cs" Link="ChlorinePumpStatus.cs" />
+    <Compile Include="..\PoolBoy.IotDevice.Common\Model\DisplayData.cs" Link="DisplayData.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\PoolPumpConfig.cs" Link="PoolPumpConfig.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\PoolPumpStatus.cs" Link="PoolPumpStatus.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\TimerTask.cs" Link="TimerTask.cs" />

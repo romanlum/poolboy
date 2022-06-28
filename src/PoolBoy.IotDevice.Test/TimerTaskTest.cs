@@ -10,6 +10,7 @@ namespace PoolBoy.IotDevice.Test
         private readonly Mock<IIoService> _ioService;
         private readonly Mock<IDeviceService> _deviceService;
         private readonly Mock<IDateTimeService> _timeService;
+        private readonly Mock<IDisplayService> _displayService;
 
         private readonly PoolPumpStatus _poolPumpStatus = new PoolPumpStatus();
         private readonly ChlorinePumpStatus _chlorinePumpStatus = new ChlorinePumpStatus();
@@ -17,6 +18,7 @@ namespace PoolBoy.IotDevice.Test
         public TimerTaskTest()
         {
             _ioService = new Mock<IIoService>();
+            _displayService = new Mock<IDisplayService>();
             _deviceService = new Mock<IDeviceService>()
                 .SetupProperty(x => x.Error, null);
             _deviceService.SetupGet(x => x.PoolPumpStatus).Returns(_poolPumpStatus);
@@ -33,7 +35,7 @@ namespace PoolBoy.IotDevice.Test
         
         public void PoolPumpTimeTest(int currentHour, int currentMinute,string start,string end,bool running)
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = start,
@@ -71,7 +73,7 @@ namespace PoolBoy.IotDevice.Test
         [Fact]
         public void PoolPumpDisabledTest()
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "12:00",
@@ -88,7 +90,7 @@ namespace PoolBoy.IotDevice.Test
             _deviceService.Setup(x => x.PoolPumpConfig).Returns(config);
             _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
             _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 13, 0, 0));
-
+            _poolPumpStatus.active = true;
             
             task.UpdateStatus();
 
@@ -101,7 +103,7 @@ namespace PoolBoy.IotDevice.Test
         public void ChangePoolPumpTimeTest()
         {
 
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "13:00",
@@ -119,7 +121,7 @@ namespace PoolBoy.IotDevice.Test
             _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
             _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 13, 1, 0));
             _ioService.SetupGet(x => x.PoolPumpActive).Returns(true);
-
+            _poolPumpStatus.active = true;
 
             task.UpdateStatus();
             
@@ -134,7 +136,7 @@ namespace PoolBoy.IotDevice.Test
         public void DisablePoolPumpTest()
         {
 
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "13:00",
@@ -153,6 +155,7 @@ namespace PoolBoy.IotDevice.Test
             _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
             _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 14, 1, 0));
             _ioService.SetupGet(x => x.PoolPumpActive).Returns(true);
+            _poolPumpStatus.active = true;
 
 
             task.UpdateStatus();
@@ -175,7 +178,7 @@ namespace PoolBoy.IotDevice.Test
         [InlineData("", "")]
         public void InvalidPoolPumpTimeTest(string start, string end)
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = start,
@@ -193,8 +196,8 @@ namespace PoolBoy.IotDevice.Test
             _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
             _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 13,0, 0));
             _deviceService.Setup(x => x.SendReportedProperties()).Verifiable();
-
-            task.UpdateStatus();
+            Assert.Throws<ArgumentException>(() => task.UpdateStatus());
+           
 
             _deviceService.Verify();
             Assert.NotNull(_deviceService.Object.Error);
@@ -206,7 +209,7 @@ namespace PoolBoy.IotDevice.Test
         [Fact]
         public void ChlorinePumpTest()
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "15:00",
@@ -247,7 +250,7 @@ namespace PoolBoy.IotDevice.Test
         [Fact]
         public void StopChlorinePumpTest()
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "15:00",
@@ -291,7 +294,7 @@ namespace PoolBoy.IotDevice.Test
         [Fact]
         public void ChlorinePumpAlreadyRunningTest()
         {
-            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object);
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
                 startTime = "15:00",
@@ -327,6 +330,52 @@ namespace PoolBoy.IotDevice.Test
             _ioService.Verify(x => x.ChangeChlorinePumpStatus(true),Times.Never);
             _ioService.Verify(x => x.ChangePoolPumpStatus(true), Times.Never);
             _deviceService.Verify(x => x.SendReportedProperties(), Times.Never);
+
+            _ioService.Verify();
+            _deviceService.Verify();
+            Assert.Null(_deviceService.Object.Error);
+
+        }
+
+        [Fact]
+        public void ChlorinePumpDisabledTest()
+        {
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
+            var config = new PoolPumpConfig
+            {
+                startTime = "12:00",
+                stopTime = "14:00",
+                enabled = true
+            };
+            var chlorineConfig = new ChlorinePumpConfig()
+            {
+                runId = 2,
+                runtime = 100,
+                enabled = false
+            };
+            _chlorinePumpStatus.runId = 1;
+            _chlorinePumpStatus.active = true;
+            _chlorinePumpStatus.startedAt = 100;
+            _poolPumpStatus.active = true;
+
+            _deviceService.Setup(x => x.PoolPumpConfig).Returns(config);
+            _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
+            _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, 13, 1, 0)); //13:01
+            _timeService.Setup(x => x.ToUnixTimeSeconds(It.IsAny<DateTime>())).Returns(100);
+            _timeService.Setup(x => x.FromUnixTimeSeconds(100)).Returns(new DateTime(2020, 1, 1, 13, 0, 0)); //13:00 + 100 sec 
+            _ioService.SetupGet(x => x.ChlorinePumpActive).Returns(true);
+            _ioService.SetupGet(x => x.PoolPumpActive).Returns(true);
+
+
+            task.UpdateStatus();
+
+            Assert.True(_poolPumpStatus.active);
+            Assert.False(_chlorinePumpStatus.active);
+            Assert.Equal(2, _chlorinePumpStatus.runId);
+            Assert.Equal(100, _chlorinePumpStatus.startedAt);
+            _ioService.Verify(x => x.ChangeChlorinePumpStatus(false), Times.Once);
+            _ioService.Verify(x => x.ChangePoolPumpStatus(true), Times.Never);
+            _deviceService.Verify(x => x.SendReportedProperties(), Times.Once);
 
             _ioService.Verify();
             _deviceService.Verify();
