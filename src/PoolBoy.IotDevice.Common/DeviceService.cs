@@ -26,7 +26,7 @@ namespace PoolBoy.IotDevice.Common
         /// <summary>
         /// Default timeout for azure calls
         /// </summary>
-        private const int DefaultTimeout = 60000;
+        private const int DefaultTimeout = 10000;
 
         /// <summary>
         /// Used for synchronizing parameters from server / client
@@ -70,6 +70,7 @@ namespace PoolBoy.IotDevice.Common
 
         private DeviceClient _deviceClient;
         private Twin _deviceTwin;
+        
 
         /// <summary>
         /// Creates a new instance
@@ -90,11 +91,29 @@ namespace PoolBoy.IotDevice.Common
             ChlorinePumpStatus = new ChlorinePumpStatus();
             PoolPumpStatus = new PoolPumpStatus();
             Error = null;
+            LastPatchId = 0;
         }
 
         public bool Reconnect()
         {
-            _deviceClient.Reconnect();
+            for (int i = 0; i < NumberOfRetries; i++)
+            {
+                try
+                {
+                    //twin is requested on connected event see OnStatusUpdated
+                    _deviceClient.Reconnect();
+                    if(_deviceClient.IsConnected)
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception)
+                {
+                    Thread.Sleep(1000);
+                    // ignored
+                }
+            }
+            
             return _deviceClient.IsConnected;
         }
 
@@ -126,15 +145,30 @@ namespace PoolBoy.IotDevice.Common
         {
             if(e.IoTHubStatus.Status == Status.Connected)
             {
-                CancellationTokenSource cancellationToken = new CancellationTokenSource(DefaultTimeout);
-                _deviceTwin = _deviceClient.GetTwin(cancellationToken.Token);
-                Debug.WriteLine(_deviceClient.IsConnected + " " + _deviceClient.IoTHubStatus);
-                if (_deviceTwin != null)
+                for(int i=0;i< NumberOfRetries; i++)
                 {
-                    ParseDesiredProperties(_deviceTwin.Properties.Desired);
-                    ParseReportedProperties(_deviceTwin.Properties.Reported);
+                    var token = new CancellationTokenSource(DefaultTimeout);
+                    _deviceTwin = _deviceClient.GetTwin(token.Token);
+                    if (_deviceTwin != null)
+                    {
+                        ParseDesiredProperties(_deviceTwin.Properties.Desired);
+                        //only parse reported properties on first connect
+                        //resend them on disconnect
+                        if (LastPatchId == 0)
+                        {
+                            ParseReportedProperties(_deviceTwin.Properties.Reported);
+                        }
+                        else
+                        {
+                            SendReportedProperties();
+                        }
+                        return;
+                    }
                 }
-            }
+                //no twin received close connection
+                //reconnect will be called because IsConnected is set to false
+                _deviceClient.Close();
+            } 
         }
 
         /// <summary>
@@ -147,7 +181,16 @@ namespace PoolBoy.IotDevice.Common
             collection.Add(GetJsonName(nameof(PoolPumpStatus)), PoolPumpStatus);
             collection.Add(GetJsonName(nameof(ChlorinePumpStatus)), ChlorinePumpStatus);
             collection.Add(GetJsonName(nameof(Error)), Error);
-            _deviceClient.UpdateReportedProperties(collection);
+            for (int i = 0; i < NumberOfRetries; i++)
+            {
+                var token = new CancellationTokenSource(DefaultTimeout);
+                if(!_deviceClient.UpdateReportedProperties(collection, token.Token))
+                {
+                    //close connection if we could not update the properties
+                    //reconnect will be called because IsConnected is set to false
+                    _deviceClient.Close();
+                }
+            }
         }
                 
 
@@ -179,7 +222,7 @@ namespace PoolBoy.IotDevice.Common
                 LastPatchId = int.Parse(collection[propertyName].ToString());
             }
 
-            PoolPumpStatus = DeserializeObject(GetJsonName(nameof(PoolPumpStatus)), collection, typeof(PoolPumpStatus)) as PoolPumpStatus;
+            PoolPumpStatus = DeserializeObject(GetJsonName(nameof(PoolPumpStatus)), collection, typeof(PoolPumpStatus)) as PoolPumpStatus;          
             ChlorinePumpStatus = DeserializeObject(GetJsonName(nameof(ChlorinePumpStatus)), collection, typeof(ChlorinePumpStatus)) as ChlorinePumpStatus;
             PoolPumpStatus ??= new PoolPumpStatus();
             ChlorinePumpStatus ??= new ChlorinePumpStatus();

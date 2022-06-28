@@ -61,15 +61,19 @@ namespace PoolBoy.IotDevice.Common
                         {
                             
                         }
+                        if (!_deviceService.Connected)
+                        {
+                            // disable pumps
+                            _ioService.ChangePoolPumpStatus(false);
+                            _ioService.ChangeChlorinePumpStatus(false);
+                        }
                         
-                    }
+                    } 
                     else
                     {
                         UpdateStatus();
                     }
-                
-
-                     
+                    
                     
                     _displayService.Data.ChlorinePumpActive = _ioService.ChlorinePumpActive;
                     _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
@@ -84,22 +88,22 @@ namespace PoolBoy.IotDevice.Common
 #if NANOFRAMEWORK_1_0
                     _displayService.Data.IpAddress = WlanTask.Connected ? WlanTask.Ip : WlanTask.ErrorMessage;
 #endif
+                    _displayService.Render();
 
                 }
                 catch (Exception e)
                 {
                     _displayService.Data.Error = e.Message;
+                    // disable pumps on error
+                    _ioService.ChangePoolPumpStatus(false);
+                    _ioService.ChangeChlorinePumpStatus(false);
+                    _displayService.Render();
 
                 }
                 finally
                 {
-                    /*if ((DateTime.UtcNow - _ioService.LastChlorinePumpActivation).TotalSeconds > MaxChlorineRelayTime)
-                    {
-                        SetChlorinePumpStatus(false);
-                        _deviceService.SendReportedProperties();
-                    }*/
                 }
-                _displayService.Render();
+                
                 Thread.Sleep(LoopTime);
 
             }
