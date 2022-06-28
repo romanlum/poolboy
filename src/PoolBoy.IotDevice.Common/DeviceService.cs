@@ -26,7 +26,7 @@ namespace PoolBoy.IotDevice.Common
         /// <summary>
         /// Default timeout for azure calls
         /// </summary>
-        private const int DefaultTimeout = 15000;
+        private const int DefaultTimeout = 60000;
 
         /// <summary>
         /// Used for synchronizing parameters from server / client
@@ -84,6 +84,9 @@ namespace PoolBoy.IotDevice.Common
             _sasKey = sasKey;
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
                 azureCert: Certificates.AzureRootCertificateAuthority());
+            _deviceClient.StatusUpdated += OnStatusUpdated;
+            _deviceClient.TwinUpated += OnDeviceTwinUpdated;
+
             ChlorinePumpStatus = new ChlorinePumpStatus();
             PoolPumpStatus = new PoolPumpStatus();
             Error = null;
@@ -105,22 +108,9 @@ namespace PoolBoy.IotDevice.Common
             {
                 try
                 {
-                    var result = _deviceClient.Open();
-                    if (result)
-                    {
-                        _deviceClient.StatusUpdated += OnStatusUpdated;
-                        CancellationTokenSource cancellationToken = new CancellationTokenSource(DefaultTimeout);
-                        _deviceTwin = _deviceClient.GetTwin(cancellationToken.Token);
-                        Debug.WriteLine(_deviceClient.IsConnected + " " + _deviceClient.IoTHubStatus);
-                        if(_deviceTwin != null)
-                        {
-                            _deviceClient.TwinUpated += OnDeviceTwinUpdated;
-                            ParseDesiredProperties(_deviceTwin.Properties.Desired);
-                            ParseReportedProperties(_deviceTwin.Properties.Reported);
-                            return true;
-                        }
-                        return false;
-                    }
+                    //twin is requested on connected event see OnStatusUpdated
+                    return _deviceClient.Open();
+
                 }
                 catch (Exception)
                 {
@@ -134,7 +124,17 @@ namespace PoolBoy.IotDevice.Common
 
         private void OnStatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
-            
+            if(e.IoTHubStatus.Status == Status.Connected)
+            {
+                CancellationTokenSource cancellationToken = new CancellationTokenSource(DefaultTimeout);
+                _deviceTwin = _deviceClient.GetTwin(cancellationToken.Token);
+                Debug.WriteLine(_deviceClient.IsConnected + " " + _deviceClient.IoTHubStatus);
+                if (_deviceTwin != null)
+                {
+                    ParseDesiredProperties(_deviceTwin.Properties.Desired);
+                    ParseReportedProperties(_deviceTwin.Properties.Reported);
+                }
+            }
         }
 
         /// <summary>
