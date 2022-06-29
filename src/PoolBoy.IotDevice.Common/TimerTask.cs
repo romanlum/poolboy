@@ -69,10 +69,10 @@ namespace PoolBoy.IotDevice.Common
                     
                     _displayService.Data.ChlorinePumpActive = _ioService.ChlorinePumpActive;
                     _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
-                    var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
-                    var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
-                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2).ToString("00")}:{startTime.Minute.ToString("00")}";
-                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2).ToString("00")}:{stopTime.Minute.ToString("00")}";
+                    //var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
+                    //var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
+                    //_displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2).ToString("00")}:{startTime.Minute.ToString("00")}";
+                    //_displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2).ToString("00")}:{stopTime.Minute.ToString("00")}";
                     _displayService.Data.ChlorinePumpId = _deviceService.ChlorinePumpConfig.runId;
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;
@@ -168,20 +168,26 @@ namespace PoolBoy.IotDevice.Common
                 //only change pool pump if chlorine pump is not active
                 if (!_deviceService.ChlorinePumpStatus.active)
                 {
-                    var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
-                    var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
-                    var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
-
-                    if (_deviceService.PoolPumpConfig.enabled && checkTime >= startTime && checkTime <= stopTime) //should be running
+                    bool shouldRun = false;
+                    if(_deviceService.PoolPumpConfig.timeslots != null)
                     {
-                        statusChanged = SetPoolPumpStatus(true);
-                    }
-                    else
-                    {
-                        statusChanged = SetPoolPumpStatus(false);
-                    }
+                        foreach (var slot in _deviceService.PoolPumpConfig.timeslots)
+                        {
+                            var startTime = DateTimeExtension.FromTimeString(slot.startTime);
+                            var stopTime = DateTimeExtension.FromTimeString(slot.stopTime);
+                            var checkTime = new DateTime(2000, 01, 01, curTime.Hour, curTime.Minute, curTime.Second);
 
+                            if (_deviceService.PoolPumpConfig.enabled && checkTime >= startTime && checkTime <= stopTime) //should be running
+                            {
+                                shouldRun = true;
+                                break;
+                            }
+
+                        }
+                    }
                     
+                    statusChanged = SetPoolPumpStatus(shouldRun);
+                                        
 
                     //reset error
                     if (_deviceService.Error != null)

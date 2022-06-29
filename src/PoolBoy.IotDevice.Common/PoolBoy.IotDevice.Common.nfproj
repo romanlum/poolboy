@@ -34,6 +34,7 @@
     <Compile Include="Model\ChlorinePumpStatus.cs" />
     <Compile Include="Model\PoolPumpConfig.cs" />
     <Compile Include="Model\PoolPumpStatus.cs" />
+    <Compile Include="Model\Timeslot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TimerTask.cs" />
     <Compile Include="WlanTask.cs" />
