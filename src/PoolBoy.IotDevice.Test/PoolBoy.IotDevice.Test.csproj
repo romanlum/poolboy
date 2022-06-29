@@ -19,6 +19,7 @@
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\DisplayData.cs" Link="DisplayData.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\PoolPumpConfig.cs" Link="PoolPumpConfig.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\Model\PoolPumpStatus.cs" Link="PoolPumpStatus.cs" />
+    <Compile Include="..\PoolBoy.IotDevice.Common\Model\Timeslot.cs" Link="Timeslot.cs" />
     <Compile Include="..\PoolBoy.IotDevice.Common\TimerTask.cs" Link="TimerTask.cs" />
   </ItemGroup>
 

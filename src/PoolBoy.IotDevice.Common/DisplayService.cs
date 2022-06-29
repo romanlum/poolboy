@@ -48,7 +48,7 @@ namespace PoolBoy.IotDevice.Common
                 _displayController.DrawString(0, 0, "Ip: " + Data.IpAddress);
                 _displayController.DrawString(0, 9, "Hub: " + (Data.HubConnectionState ? "Verbunden" : "Fehler   "));
                 _displayController.DrawString(0, 18, "Poolpumpe:  " + (Data.PoolPumpActive ? "ein" : "aus"));
-                _displayController.DrawString(0, 27, " " + Data.PoolPumpStartTime + " - " + Data.PoolPumpStopTime);
+                //_displayController.DrawString(0, 27, " " + Data.PoolPumpStartTime + " - " + Data.PoolPumpStopTime);
                 _displayController.DrawString(0, 36, "Chlorpumpe: " + (Data.ChlorinePumpActive ? "ein" : "aus"));
                 if (Data.ChlorinePumpActive)
                 {
