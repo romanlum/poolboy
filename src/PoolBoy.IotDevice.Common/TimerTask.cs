@@ -61,30 +61,23 @@ namespace PoolBoy.IotDevice.Common
                         {
                             
                         }
-                        if (!_deviceService.Connected)
-                        {
-                            // disable pumps
-                            _ioService.ChangePoolPumpStatus(false);
-                            _ioService.ChangeChlorinePumpStatus(false);
-                        }
-                        
                     } 
-                    else
-                    {
-                        UpdateStatus();
-                    }
+                    
+                    UpdateStatus();
+                    
                     
                     
                     _displayService.Data.ChlorinePumpActive = _ioService.ChlorinePumpActive;
                     _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
                     var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
                     var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
-                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2)}:{startTime.Minute}";
-                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2)}:{stopTime.Minute}";
+                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2).ToString("00")}:{startTime.Minute.ToString("00")}";
+                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2).ToString("00")}:{stopTime.Minute.ToString("00")}";
                     _displayService.Data.ChlorinePumpId = _deviceService.ChlorinePumpConfig.runId;
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;
                     _displayService.Data.HubConnectionState = _deviceService.Connected;
+                    _displayService.Data.DateTime = DateTime.UtcNow.ToString();
 #if NANOFRAMEWORK_1_0
                     _displayService.Data.IpAddress = WlanTask.Connected ? WlanTask.Ip : WlanTask.ErrorMessage;
 #endif

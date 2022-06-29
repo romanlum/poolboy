@@ -11,5 +11,7 @@
         public int ChlorinePumpId { get; set; }
         public int ChlorinePumpRuntime { get; set; }
         public string Error { get; set; }
+
+        public string DateTime { get; set; }
     }
 }

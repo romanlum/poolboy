@@ -58,6 +58,7 @@ namespace PoolBoy.IotDevice.Common
                 {
                     _displayController.DrawString(0, 45, "                            ");
                 }
+                _displayController.DrawString(0, 54, Data.DateTime);
             }
             else
             {
