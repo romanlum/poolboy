@@ -56,8 +56,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = start,
-                stopTime = end,
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = start,
+                        stopTime = end
+                    } 
+                }, 
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -88,14 +92,85 @@ namespace PoolBoy.IotDevice.Test
 
         }
 
+
+        [Theory]
+        [InlineData(12,0,false)] //no entry
+        [InlineData(13,1, true)] //first entry
+        [InlineData(15, 1,true)] //second entry
+        [InlineData(16, 45,false)] //no entry
+        [InlineData(17, 33, true)] //third entry
+        [InlineData(18, 33, false)] //no entry
+        [InlineData(22,10, true)] //last entry
+        public void PoolPumpTimeslotsTest(int currentHour, int currentMin, bool running)
+        {
+            var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
+            var config = new PoolPumpConfig
+            {
+                timeslots = new[] { 
+                    new Timeslot
+                    {
+                        startTime = "13:00",
+                        stopTime = "14:00"
+                    }
+                    ,new Timeslot
+                    {
+                        startTime = "13:00",
+                        stopTime = "16:30"
+                    }
+                    ,new Timeslot
+                    {
+                        startTime = "17:00",
+                        stopTime = "18:00"
+                    }
+                    ,new Timeslot
+                    {
+                        startTime = "19:00",
+                        stopTime = "23:00"
+                    }
+                    
+                },
+                enabled = true
+            };
+            var chlorineConfig = new ChlorinePumpConfig()
+            {
+                runId = 0,
+                runtime = 0,
+                enabled = true
+            };
+
+            _deviceService.Setup(x => x.PoolPumpConfig).Returns(config);
+            _deviceService.Setup(x => x.ChlorinePumpConfig).Returns(chlorineConfig);
+            _timeService.Setup(x => x.Now).Returns(new DateTime(2020, 1, 1, currentHour,currentMin, 0));
+
+            if (running)
+            {
+                _deviceService.Setup(x => x.SendReportedProperties()).Verifiable();
+                _ioService.Setup(x => x.ChangePoolPumpStatus(true)).Verifiable();
+            }
+
+
+            task.UpdateStatus();
+
+            Assert.Equal(running, _poolPumpStatus.active);
+
+            _ioService.Verify();
+            _deviceService.Verify();
+            Assert.Null(_deviceService.Object.Error);
+
+        }
+
         [Fact]
         public void PoolPumpDisabledTest()
         {
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "12:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "12:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = false
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -124,8 +199,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "13:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "13:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -157,8 +236,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "13:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "13:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -199,8 +282,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = start,
-                stopTime = end,
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = start,
+                        stopTime = end
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -230,8 +317,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "15:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "15:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -271,8 +362,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "15:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "15:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -315,8 +410,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "15:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "15:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
@@ -361,8 +460,12 @@ namespace PoolBoy.IotDevice.Test
             var task = new TimerTask(_deviceService.Object, _ioService.Object, _timeService.Object, _displayService.Object);
             var config = new PoolPumpConfig
             {
-                startTime = "12:00",
-                stopTime = "14:00",
+                timeslots = new[] { new Timeslot
+                    {
+                        startTime = "12:00",
+                        stopTime = "14:00"
+                    }
+                },
                 enabled = true
             };
             var chlorineConfig = new ChlorinePumpConfig()
