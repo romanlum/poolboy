@@ -3,11 +3,11 @@ This document explains the used schema for the poolboy device twin
 
 ## Properties
 ### Desired properties
-|Property| Description | Example value|
+|Property| Description |
 |---|---|---|
-|patchId|property used to check if the desired properties are acknowleged|  1 |
-|poolPumpConfig| Configuration for the pool pump  | ```{ enabled:true, startTime: "10:00:00", stopTime: "10:12:00" }```|
-|chlorinePumpConfig| Configuration for the clorine pump|```{ enabled:true, runId: 1, runtime: 3600 }```|
+|patchId|property used to check if the desired properties are acknowleged| 
+|poolPumpConfig| Configuration for the pool pump  | 
+|chlorinePumpConfig| Configuration for the clorine pump |
 
 ### Reported properties
 |Property| Description | Example value|
@@ -25,6 +25,11 @@ number
 |Property| Type | Description | Example value|
 |---|---|---|---|
 |enabled| bool | pool pump enabled, used for stopping the pump at any time|  true/false |
+|timeslots| array |Timeslots for enabling pool pump | |
+
+### Timeslot Schema
+|Property| Type | Description | Example value|
+|---|---|---|---|
 |startTime| string |Time when the pump starts (format hh:mm:ss) |10:12:59|
 |stopTime|string |Time when the pump stops (format hh:mm:ss) |10:20:00|
 
