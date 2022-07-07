@@ -43,16 +43,23 @@
 
         </div>
         <div class="card-body">
-            <div class="form-group">
+            @foreach(var slot in ViewModel.TimeSlots.Select((t ,i) => new {Item = t, Index = i}))
+            {
+                <h3> TimeSlot @(slot.Index + 1) <button class="btn btn-warning" @onclick="async ()=> ViewModel.RemoveTimeSlot(slot.Index)">Remove Timeslot </button></h3>
+                 <div class="form-group">
                 <label for="startTime">StartTime</label>
-                <input type="time" class="form-control" id="startTime" aria-describedby="starttimeHelp" placeholder="01:00" @bind="ViewModel.PoolPumpStartTime">>
+                <input type="time" class="form-control" id="startTime" aria-describedby="starttimeHelp" placeholder="01:00" value="@slot.Item.Item1"  @onchange="@(e => ViewModel.TimeSlots[slot.Index] = Tuple.Create(((TimeOnly)e.Value),slot.Item.Item2))">
                 <small id="starttimeHelp" class="form-text text-muted">Time when PoolPump Starts.</small>
             </div>
             <div class="form-group">
                 <label for="stopTime">StopTime</label>
-                <input type="time" class="form-control" id="stopTime" aria-describedby="stopTimeHelp" placeholder="01:00" @bind="ViewModel.PoolPumpStopTime">
+                <input type="time" class="form-control" id="stopTime" aria-describedby="stopTimeHelp" placeholder="01:00" value="@slot.Item.Item2" @onchange="@(e => ViewModel.TimeSlots[slot.Index] = Tuple.Create(slot.Item.Item1,((TimeOnly)e.Value)))">
                 <small id="stopTimeHelp" class="form-text text-muted"> Time when PoolPump Stops.</small>
             </div>
+            <hr  style="margin-bottom: 10px;" size="5"/>
+            }
+           
+             <button class="btn btn-success" @onclick="ViewModel.AddNewTimeSlot" style="margin-right: 10px">Add New Timeslot</button>
             @if (ViewModel.PatchId > ViewModel.LastPatchId)
             {
                 <button class="btn btn-primary" type="button" disabled>

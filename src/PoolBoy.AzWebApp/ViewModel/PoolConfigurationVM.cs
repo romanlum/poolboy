@@ -13,8 +13,8 @@ namespace PoolBoyWebApp.ViewModel
         {
             _hubService = hubService;
         }
-        public TimeOnly PoolPumpStartTime { get; set; }
-        public TimeOnly PoolPumpStopTime { get; set; }
+        public IList<Tuple<TimeOnly,TimeOnly>> TimeSlots { get; set; } = new List<Tuple<TimeOnly,TimeOnly>>();
+       
         public int PatchId { get; set; }
         public int LastPatchId { get; set; }
 
@@ -29,15 +29,15 @@ namespace PoolBoyWebApp.ViewModel
             _deviceState = await _hubService.GetCurrentDeviceState();
             _hubService.DeviceStateChanged += StateChangeHandlerListener;
             _hubService.EventStreamChanged += EventStreamChangedHandlerListener;
-            PoolPumpStartTime = TimeOnly.Parse(_deviceState.PoolPumpConfig.startTime);
-            PoolPumpStopTime = TimeOnly.Parse(_deviceState.PoolPumpConfig.stopTime);
+            TimeSlots = _deviceState.PoolPumpConfig.Timeslots.Select(x => Tuple.Create(TimeOnly.Parse(x.startTime), TimeOnly.Parse(x.stopTime))).ToList();
+            
             PatchId = _deviceState.PatchId;
             LastPatchId = _deviceState.LastPatchId;
             ChlorinePumpDuration = _deviceState.ChlorinePumpConfig.runtime;
             ChlorinePumpRunId = _deviceState.ChlorinePumpConfig.runId;
             ChlorinePumpRunning = _deviceState.ChlorinePumpStatus?.active;
             PoolPumpRunning = _deviceState.PoolPumpStatus?.active;
-            OnPropertyChanged(nameof(PoolPumpStartTime));
+            OnPropertyChanged(nameof(TimeSlots));
 
         }
 
@@ -47,19 +47,28 @@ namespace PoolBoyWebApp.ViewModel
             OnPropertyChanged(nameof(EventStream));
         }
 
+        public async void AddNewTimeSlot()
+        {
+            TimeSlots.Add(Tuple.Create(TimeOnly.FromDateTime(DateTime.UtcNow), TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1))));
+        }
+        public async void RemoveTimeSlot(int index)
+        {
+            TimeSlots.RemoveAt(index);
+        }
+
         private async void StateChangeHandlerListener(object sender, DeviceState deviceState)
         {
             Console.WriteLine("Device State Changed");
             _deviceState = deviceState;
-            PoolPumpStartTime = TimeOnly.Parse(_deviceState.PoolPumpConfig.startTime);
-            PoolPumpStopTime = TimeOnly.Parse(_deviceState.PoolPumpConfig.stopTime);
+            TimeSlots = _deviceState.PoolPumpConfig.Timeslots.Select(x => Tuple.Create(TimeOnly.Parse(x.startTime), TimeOnly.Parse(x.stopTime))).ToList();
+
             PatchId = _deviceState.PatchId;
             LastPatchId = _deviceState.LastPatchId;
             ChlorinePumpDuration = _deviceState.ChlorinePumpConfig.runtime;
             ChlorinePumpRunId = _deviceState.ChlorinePumpConfig.runId;
             ChlorinePumpRunning = _deviceState.ChlorinePumpStatus?.active;
             PoolPumpRunning = _deviceState.PoolPumpStatus?.active;
-            OnPropertyChanged(nameof(PoolPumpStartTime));
+            OnPropertyChanged(nameof(TimeSlots));
         }
         public void Dispose()
         {
@@ -80,8 +89,7 @@ namespace PoolBoyWebApp.ViewModel
             await _hubService.SetPoolPumpConfiguration(LastPatchId, new PoolBoy.PoolBoyWebApp.Data.Model.PoolPumpConfig()
             {
                 enabled = true,
-                startTime = PoolPumpStartTime.ToString(CultureInfo.InvariantCulture),
-                stopTime = PoolPumpStopTime.ToString(CultureInfo.InvariantCulture)
+                Timeslots = TimeSlots.Select(t => new PoolBoy.PoolBoyWebApp.Data.Model.Timeslot() { startTime = t.Item1.ToString(CultureInfo.InvariantCulture), stopTime = t.Item2.ToString(CultureInfo.InvariantCulture)})
             }) ;
         }
     }
