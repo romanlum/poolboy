@@ -19,15 +19,15 @@ namespace PoolBoy.AzChlorineSchedulerFunc.Models.Ondilo
         public string Message { get; set; }
 
         [JsonPropertyName("created_at")]
-        public DateTime CreatedAt { get; set; }
+        public string CreatedAt { get; set; }
 
         [JsonPropertyName("updated_at")]
-        public DateTime UpdatedAt { get; set; }
+        public string UpdatedAt { get; set; }
 
         [JsonPropertyName("status")]
         public string Status { get; set; }
 
         [JsonPropertyName("deadline")]
-        public DateTime Deadline { get; set; }
+        public string Deadline { get; set; }
     }
 }
