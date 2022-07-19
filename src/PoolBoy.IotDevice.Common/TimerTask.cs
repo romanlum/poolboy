@@ -71,8 +71,8 @@ namespace PoolBoy.IotDevice.Common
                     _displayService.Data.PoolPumpActive = _ioService.PoolPumpActive;
                     var startTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.startTime);
                     var stopTime = DateTimeExtension.FromTimeString(_deviceService.PoolPumpConfig.stopTime);
-                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2).ToString("00")}:{startTime.Minute.ToString("00")}";
-                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2).ToString("00")}:{stopTime.Minute.ToString("00")}";
+                    _displayService.Data.PoolPumpStartTime = $"{(startTime.Hour + 2)}:{startTime.Minute}";
+                    _displayService.Data.PoolPumpStopTime = $"{(stopTime.Hour + 2)}:{stopTime.Minute}";
                     _displayService.Data.ChlorinePumpId = _deviceService.ChlorinePumpConfig.runId;
                     _displayService.Data.ChlorinePumpRuntime = _deviceService.ChlorinePumpConfig.runtime;
                     _displayService.Data.Error = null;

@@ -86,8 +86,8 @@ namespace PoolBoy.IotDevice.Common
             _deviceClient = new DeviceClient(iotBrokerAddress, deviceId, sasKey,
                 azureCert: Certificates.AzureRootCertificateAuthority());
             _deviceClient.StatusUpdated += OnStatusUpdated;
-            _deviceClient.TwinUpated += OnDeviceTwinUpdated;
-
+            _deviceClient.TwinUpdated += OnDeviceTwinUpdated;
+      
             ChlorinePumpStatus = new ChlorinePumpStatus();
             PoolPumpStatus = new PoolPumpStatus();
             Error = null;
@@ -101,7 +101,15 @@ namespace PoolBoy.IotDevice.Common
                 try
                 {
                     //twin is requested on connected event see OnStatusUpdated
-                    _deviceClient.Reconnect();
+                    try
+                    {
+                        _deviceClient.Reconnect();
+                    }
+                    catch (NullReferenceException)
+                    {
+                        _deviceClient.Open();
+                    }
+                    
                     if(_deviceClient.IsConnected)
                     {
                         return true;
@@ -192,6 +200,7 @@ namespace PoolBoy.IotDevice.Common
                     _deviceClient.Close();
                 }
             }
+            
         }
                 
 
