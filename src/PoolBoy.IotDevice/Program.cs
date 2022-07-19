@@ -38,20 +38,23 @@ namespace PoolBoy.IotDevice
             displayService.Render();
             string DeviceID =$"poolboy-{Helpers.Helpers.GetMacId()}";
             const string IotBrokerAddress = "poolboyhub.azure-devices.net";
-            const string SasKey = "xxxx";
-
-            var service = new DeviceService(DeviceID, IotBrokerAddress, SasKey);
-            if (service.Connect())
+            
+            var service = new DeviceService(DeviceID, IotBrokerAddress, "xxx");
+            try
             {
-                displayService.Data.HubConnectionState = true;
+                service.Connect();
+            }
+            catch (Exception)
+            {
+            }
+
+            {
+            //    displayService.Data.HubConnectionState = true;
                 TimerTask timer = new TimerTask(service, new IoService(25, 26), new DateTimeService(), displayService);
                 timer.RunLoop();
                 
             }
-            else
-            {
-                displayService.Data.HubConnectionState = false;
-            }
+         
             displayService.Render();
 
             Thread.Sleep(Timeout.Infinite);

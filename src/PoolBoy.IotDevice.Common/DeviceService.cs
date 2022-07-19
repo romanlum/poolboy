@@ -143,6 +143,7 @@ namespace PoolBoy.IotDevice.Common
 
         private void OnStatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
+            Debug.WriteLine("Hub status changed " + e.IoTHubStatus.Message + ", " + e.IoTHubStatus.Status);
             if(e.IoTHubStatus.Status == Status.Connected)
             {
                 for(int i=0;i< NumberOfRetries; i++)

@@ -1,4 +1,6 @@
-﻿namespace PoolBoy.IotDevice.Common.Model
+﻿using System;
+
+namespace PoolBoy.IotDevice.Common.Model
 {
     public class DisplayData
     {
@@ -12,6 +14,6 @@
         public int ChlorinePumpRuntime { get; set; }
         public string Error { get; set; }
 
-        public string DateTime { get; set; }
+        public string DateTime { get; set; } = String.Empty;
     }
 }
